@@ -1,0 +1,26 @@
+## Interface: 120000
+## Title: LorePin
+## Notes: Pin personal notes to locations on the world map.
+## Notes-koKR: 월드맵 위치에 개인 메모를 핀으로 고정합니다.
+## Author: hwanyu365
+## Version: 1.0.0
+## IconTexture: Interface\AddOns\LorePin\Media\icon.tga
+## SavedVariables: LorePinDB
+
+Init.lua
+
+Locale\enUS.lua
+Locale\koKR.lua
+
+Core\Config.lua
+Core\CategoryManager.lua
+Core\PinManager.lua
+Core\MapRenderer.lua
+
+UI\Layout.lua
+UI\PinPopup.lua
+UI\DetailPanel.lua
+UI\ListPanel.lua
+UI\Settings.lua
+
+Core\SlashCommands.lua

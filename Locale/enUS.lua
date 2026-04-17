@@ -1,0 +1,85 @@
+local _, ns = ...
+local L = ns.L
+
+-- General
+L.PIN_CREATED         = "Pin created: %s"
+L.PIN_UPDATED         = "Pin updated: %s"
+L.PIN_DELETED         = "Pin deleted: %s"
+L.PIN_NOT_FOUND       = "Pin not found."
+L.NO_POSITION         = "Cannot determine current position."
+L.NO_MAP              = "No map available."
+L.MAX_PINS_REACHED    = "Maximum pin count reached (%d)."
+L.TITLE_REQUIRED      = "Title is required."
+
+-- Categories (built-in)
+L.CATEGORY_GENERAL    = "General"
+L.CATEGORY_QUEST      = "Quest"
+L.CATEGORY_DANGER     = "Danger"
+L.CATEGORY_GATHER     = "Gather"
+L.CATEGORY_SCENIC     = "Scenic"
+L.CATEGORY_COMPLETE   = "Complete"
+
+-- Pin Popup
+L.POPUP_TITLE         = "New Pin"
+L.POPUP_EDIT_TITLE    = "Edit Pin"
+L.FIELD_TITLE         = "Title"
+L.FIELD_NOTE          = "Note"
+L.FIELD_CATEGORY      = "Category"
+L.FIELD_LOCATION      = "Location"
+L.FIELD_COORD_X       = "X"
+L.FIELD_COORD_Y       = "Y"
+L.BTN_USE_PLAYER_POS  = "Current"
+L.BTN_PICK_FROM_MAP   = "Pick on Map"
+L.PICK_MODE_HINT      = "Click on the World Map to place the pin. ESC to cancel."
+L.INVALID_COORDINATES = "Invalid coordinates. X and Y must be between 0 and 100."
+L.BUTTON_SAVE         = "Save"
+L.BUTTON_CANCEL       = "Cancel"
+L.BUTTON_DELETE       = "Delete"
+L.BUTTON_EDIT         = "Edit"
+L.BUTTON_CLOSE        = "Close"
+L.BUTTON_WAYPOINT     = "Waypoint"
+L.BUTTON_TOMTOM       = "TomTom"
+
+-- Detail / Edit Panel
+L.DETAIL_TITLE        = "Pin"
+L.DETAIL_MODE_VIEW    = "View"
+L.DETAIL_MODE_EDIT    = "Edit"
+L.CREATED_AT          = "Created"
+L.CREATED_BY          = "Created by"
+L.CONFIRM_DELETE      = "Delete this pin?"
+L.UNSAVED_CHANGES     = "You have unsaved changes."
+L.DISCARD_CONFIRM     = "Discard unsaved changes?"
+
+-- List Panel
+L.LIST_TITLE          = "My Pins"
+L.LIST_EMPTY          = "No pins yet. Use /lp to create one."
+L.LIST_SEARCH         = "Search"
+L.LIST_FILTER_ALL     = "All"
+L.LIST_SORT_NEWEST    = "Newest"
+L.LIST_SORT_OLDEST    = "Oldest"
+L.LIST_SORT_MAP       = "Map"
+L.LIST_TOTAL_COUNT    = "Total: %d pins"
+L.LIST_NEW_PIN        = "New Pin"
+L.LIST_ROW_WAYPOINT   = "Waypoint"
+L.LIST_ROW_TOMTOM     = "TomTom"
+L.TOMTOM_NOT_LOADED   = "TomTom addon is not installed."
+
+-- Settings
+L.SETTING_SHOW_WMAP   = "Show pins on World Map"
+L.SETTING_SHOW_MMAP   = "Show pins on Minimap"
+L.SETTING_WMAP_SIZE   = "World Map icon size"
+L.SETTING_MMAP_SIZE   = "Minimap icon size"
+L.SETTING_MAX_PINS    = "Maximum pin count"
+L.SETTING_RESET_PINS       = "Reset all pins"
+L.SETTING_RESET_PINS_CONFIRM = "Delete ALL pins? This cannot be undone."
+L.SETTING_RESET_SETTINGS    = "Reset settings to defaults"
+L.SETTING_RESET_SETTINGS_CONFIRM = "Reset all settings to defaults? (Pins will NOT be deleted.)"
+L.SETTING_OPEN_LIST         = "Open pin list"
+
+-- Slash Commands
+L.HELP_HEADER         = "LorePin commands:"
+L.HELP_NEW            = "/lp — create pin at current location"
+L.HELP_TITLE          = "/lp <title> — quick create with title"
+L.HELP_LIST           = "/lp list — show all pins"
+L.HELP_SETTINGS       = "/lp settings — open settings"
+L.HELP_HELP           = "/lp help — show this help"
