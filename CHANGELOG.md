@@ -1,5 +1,10 @@
 # LorePin Changelog
 
+## [1.0.1] - 2026-08-15
+
+### Changed
+- Interface 번호를 `120100` (Midnight 12.1) 으로 갱신.
+
 ## [1.0.0] - 2026-04-18
 
 Initial public release.
