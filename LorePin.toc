@@ -1,9 +1,9 @@
-## Interface: 120100
+## Interface: 120105
 ## Title: LorePin
 ## Notes: Pin personal notes to locations on the world map.
 ## Notes-koKR: 월드맵 위치에 개인 메모를 핀으로 고정합니다.
 ## Author: hwanyu365
-## Version: 1.0.1
+## Version: 1.0.2
 ## IconTexture: Interface\AddOns\LorePin\Media\icon.tga
 ## SavedVariables: LorePinDB
 ## X-Curse-Project-ID: 1516897
