@@ -14,6 +14,7 @@ Locale\enUS.lua
 Locale\koKR.lua
 
 Core\Config.lua
+Core\Notify.lua
 Core\CategoryManager.lua
 Core\PinManager.lua
 Core\MapRenderer.lua

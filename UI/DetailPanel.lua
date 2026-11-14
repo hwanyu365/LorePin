@@ -24,7 +24,7 @@ StaticPopupDialogs["LOREPIN_CONFIRM_DELETE"] = {
             ns:Print(string.format(ns.L.PIN_DELETED, pin.title or ""))
             if data.onDeleted then data.onDeleted() end
         else
-            ns:Print(ns.L.PIN_NOT_FOUND)
+            ns:NotifyError(ns.L.PIN_NOT_FOUND)
         end
     end,
     timeout = 0, whileDead = true, hideOnEscape = true, preferredIndex = 3,
@@ -191,6 +191,8 @@ end
 local function UpdateDirtyFromFields(f)
     f.isDirty = ComputeDirty(f)
     RefreshDirtyState(f)
+    local _, res = ns:CheckPinInput({ title = f.titleEdit:GetText() })
+    ns.Layout.SetBlockedReasons(f.btnSave, res.reasons)
 end
 
 -- Public: show the detail panel for a pin by ID
@@ -270,8 +272,8 @@ function ns:ShowPinDetail(pinId)
     -- Save button: persist changes, re-sync view
     f.btnSave:SetScript("OnClick", function()
         local title = f.titleEdit:GetText() or ""
-        if ns:IsBlankTitle(title) then
-            ns:Print(L.TITLE_REQUIRED)
+        if not ns:CheckPinInput({ title = title }) then
+            UpdateDirtyFromFields(f)
             return
         end
         ns:UpdatePin(pin.id, {
@@ -346,7 +348,7 @@ function ns:ShowPinDetail(pinId)
 
     f.btnTomTom:SetScript("OnClick", function()
         local result, err = ns:ToggleTomTomForPin(pin)
-        if not result and err then ns:Print(err); return end
+        if not result and err then ns:NotifyError(err); return end
         RefreshTomTomHighlight()
     end)
 

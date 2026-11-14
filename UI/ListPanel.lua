@@ -159,7 +159,7 @@ local function CreateRow(parent)
         if not pin then return end
         local result, err = ns:ToggleTomTomForPin(pin)
         if not result then
-            if err then ns:Print(err) end
+            if err then ns:NotifyError(err) end
             return
         end
         RefreshTomTomButton()

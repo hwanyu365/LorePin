@@ -25,6 +25,7 @@ function support.stub_wow(opts)
     TomTom = nil
     UiMapPoint = nil
     C_SuperTrack = nil
+    UIErrorsFrame = nil
     LorePinDB = opts.db
 end
 
@@ -37,7 +38,10 @@ function support.addon(opts)
     load_source("Core/Config.lua", ns)
     load_source("Core/CategoryManager.lua", ns)
     load_source("Core/PinManager.lua", ns)
+    load_source("Core/Notify.lua", ns)
     ns:InitDB()
+    ns.printed = {}
+    function ns:Print(msg) self.printed[#self.printed + 1] = msg end
 
     ns.calls = { worldMap = 0, list = 0, removedFromMap = {} }
     function ns:RefreshWorldMapPins() self.calls.worldMap = self.calls.worldMap + 1 end

@@ -192,7 +192,7 @@ local function StartPickMode(opts)
         ns:InstallMapPicker()
     end
     if not pickerOverlay then
-        ns:Print("Map picker unavailable.")
+        ns:NotifyError("Map picker unavailable.")
         return
     end
 
@@ -317,6 +317,23 @@ local function EnsureDialog()
     })
     f.saveButton = buttons.save
 
+    local defaultR, defaultG, defaultB = xEdit:GetTextColor()
+    local function RefreshSaveState()
+        local _, res = ns:CheckPinInput({ title = titleEdit:GetText(), x = xEdit:GetText(), y = yEdit:GetText() })
+        for _, pair in ipairs({ { xEdit, res.x }, { yEdit, res.y } }) do
+            if pair[2] then
+                pair[1]:SetTextColor(defaultR, defaultG, defaultB)
+            else
+                pair[1]:SetTextColor(1.0, 0.2, 0.2)
+            end
+        end
+        Layout.SetBlockedReasons(f.saveButton, res.reasons)
+    end
+    f.RefreshSaveState = RefreshSaveState
+    for _, edit in ipairs({ titleEdit, xEdit, yEdit }) do
+        edit:HookScript("OnTextChanged", RefreshSaveState)
+    end
+
     dialog = f
     return f
 end
@@ -329,6 +346,7 @@ local function ApplyLocation(f, loc)
     f.mapNameText:SetText(mapName)
     f.xEdit:SetText(string.format("%.1f", (loc.x or 0) * 100))
     f.yEdit:SetText(string.format("%.1f", (loc.y or 0) * 100))
+    f.RefreshSaveState()
 end
 
 -- Options:
@@ -363,7 +381,7 @@ function ns:ShowPinPopup(opts)
     else
         local playerLoc, err = self:GetPlayerLocation()
         if not playerLoc then
-            self:Print(err or L.NO_POSITION)
+            self:NotifyError(err or L.NO_POSITION)
             return
         end
         loc = playerLoc
@@ -374,7 +392,7 @@ function ns:ShowPinPopup(opts)
     f.currentBtn:SetScript("OnClick", function()
         local playerLoc, err = self:GetPlayerLocation()
         if not playerLoc then
-            self:Print(err or L.NO_POSITION)
+            self:NotifyError(err or L.NO_POSITION)
             return
         end
         ApplyLocation(f, playerLoc)
@@ -397,18 +415,12 @@ function ns:ShowPinPopup(opts)
     -- Save: validate coords + title, then create
     f.saveButton:SetScript("OnClick", function()
         local title = f.titleEdit:GetText() or ""
-        if self:IsBlankTitle(title) then
-            self:Print(L.TITLE_REQUIRED)
+        if not self:CheckPinInput({ title = title, x = f.xEdit:GetText(), y = f.yEdit:GetText() }) then
+            f.RefreshSaveState()
             return
         end
-
-        -- Parse coordinates (user input is in 0..100 scale)
         local xRaw = tonumber(f.xEdit:GetText())
         local yRaw = tonumber(f.yEdit:GetText())
-        if not xRaw or not yRaw or xRaw < 0 or xRaw > 100 or yRaw < 0 or yRaw > 100 then
-            self:Print(L.INVALID_COORDINATES)
-            return
-        end
 
         local pin, err = self:CreatePin({
             title    = title,
@@ -419,7 +431,7 @@ function ns:ShowPinPopup(opts)
             y        = yRaw / 100,
         })
         if not pin then
-            self:Print(err or "Failed to create pin")
+            self:NotifyError(err or "Failed to create pin")
             return
         end
         self:Print(string.format(L.PIN_CREATED, title))
