@@ -41,6 +41,7 @@ local function new_env(file)
     end
 
     function env.it(name, fn)
+        env.__ran = (env.__ran or 0) + 1
         local full = table.concat(scope, " > ") .. " > " .. name
         local ok, err = xpcall(fn, debug.traceback)
         if ok then
@@ -81,10 +82,14 @@ for _, file in ipairs(arg) do
     if not chunk then
         failures[#failures + 1] = file .. ": load\n    " .. tostring(err)
     else
-        setfenv(chunk, new_env(file))
+        local env = new_env(file)
+        setfenv(chunk, env)
         local ok, runErr = xpcall(chunk, debug.traceback)
         if not ok then
             failures[#failures + 1] = file .. ": top level\n    " .. tostring(runErr):gsub("\n", "\n    ")
+        elseif not env.__ran then
+            -- 오타·빈 describe 로 테스트가 하나도 안 돌면 통과로 보이지 않게 한다.
+            failures[#failures + 1] = file .. ": no tests ran"
         end
     end
 end
