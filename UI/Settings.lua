@@ -102,7 +102,7 @@ function ns:InitSettings()
 
     local title = panel:CreateFontString(nil, "ARTWORK", FONT_TITLE)
     title:SetPoint("TOPLEFT", MARGIN, TITLE_Y)
-    title:SetText("LorePin v0.1.0")
+    title:SetText(ns:GetSettingsTitle())
 
     local y = CONTENT_Y
 

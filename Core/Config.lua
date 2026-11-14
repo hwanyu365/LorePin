@@ -53,4 +53,10 @@ function ns:ResetSettings()
     MergeDefaults(LorePinDB.settings, DEFAULTS.settings)
 end
 
+function ns:GetSettingsTitle()
+    local version = C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata("LorePin", "Version")
+    if version and version ~= "" then return "LorePin v" .. version end
+    return "LorePin"
+end
+
 ns.DEFAULTS = DEFAULTS
