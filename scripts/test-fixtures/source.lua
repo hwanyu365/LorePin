@@ -1,0 +1,3 @@
+local name, ns = ...
+ns.name = name
+ns.stub = stub_value

@@ -27,3 +27,19 @@ if ! command -v luacheck > /dev/null; then
     exit 1
 fi
 luacheck .
+
+if ! command -v lua5.1 > /dev/null; then
+    echo "실패: lua5.1 이 없습니다. 설치: apt-get install lua5.1 (Windows: LuaBinaries 5.1.5 를 PATH 의 lua5.1 로)"
+    exit 1
+fi
+sh scripts/test-selfcheck.sh
+
+# 커밋 전 테스트도 돌린다 → 추적성 검사(spec-trace.sh)와 같은 범위.
+tests="$(git -c core.quotePath=false ls-files --cached --others --exclude-standard -- '*.test.lua')"
+if [ -z "$tests" ]; then
+    echo "테스트: 0 files"
+else
+    # 파일 목록은 줄 단위로만 나눈다 → 이름에 공백이 있어도 한 파일이다.
+    # shellcheck disable=SC2086
+    ( IFS=$'\n'; set -f; lua5.1 scripts/test.lua $tests )
+fi

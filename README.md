@@ -10,7 +10,7 @@ Pin personal notes to locations on the World of Warcraft world map.
 - **Categories**: Organize pins by category (Quest, Danger, Gather, Scenic, Complete) with custom categories support
 - **World Map & Minimap**: View your pins on the world map and minimap
 - **Account-wide**: All your characters share the same pin database
-- **Search & Filter**: Find pins by title, category, or map
+- **Search, Filter & Sort**: Search pins by title or note, filter by category, sort by date or map
 - **Localization**: English and Korean supported
 
 ## Why LorePin?
@@ -29,7 +29,7 @@ Existing addons serve different purposes:
 ## Usage
 
 - `/lp` — Open pin creation popup at current location
-- `/lp <title>` — Quick-create a pin with a title
+- `/lp <title>` — Open pin creation popup with the title filled in
 - `/lp list` — Show all pins
 - `/lp settings` — Open settings panel
 - `/lp help` — Show all commands
@@ -37,7 +37,7 @@ Existing addons serve different purposes:
 ## Requirements
 
 - World of Warcraft: Midnight (12.0.0+)
-- Interface: 120000
+- Interface: 120105
 
 ## License
 
