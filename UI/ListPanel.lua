@@ -439,16 +439,8 @@ function ns:RefreshPinList()
         row:SetWidth(width)
         FormatRow(row, pins[i])
 
-        row:SetScript("OnClick", function(self, button)
-            if button == "RightButton" then
-                self:GetParent():GetParent().lastEditedPinId = self.pinData.id
-                ns:ShowPinPopup({
-                    editPinId = self.pinData.id,
-                    onSaved   = function() ns:RefreshPinList() end,
-                })
-            else
-                ns:ShowPinDetail(self.pinData.id)
-            end
+        row:SetScript("OnClick", function(self)
+            ns:ShowPinDetail(self.pinData.id)
         end)
         row:Show()
     end
