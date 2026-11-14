@@ -66,9 +66,7 @@ L.TOMTOM_NOT_LOADED   = "TomTom addon is not installed."
 
 -- Settings
 L.SETTING_SHOW_WMAP   = "Show pins on World Map"
-L.SETTING_SHOW_MMAP   = "Show pins on Minimap"
 L.SETTING_WMAP_SIZE   = "World Map icon size"
-L.SETTING_MMAP_SIZE   = "Minimap icon size"
 L.SETTING_MAX_PINS    = "Maximum pin count"
 L.SETTING_RESET_PINS       = "Reset all pins"
 L.SETTING_RESET_PINS_CONFIRM = "Delete ALL pins? This cannot be undone."
