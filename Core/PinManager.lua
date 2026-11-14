@@ -38,9 +38,13 @@ function ns:GetPlayerLocation()
     return { mapID = mapID, x = x, y = y }
 end
 
+function ns:IsBlankTitle(title)
+    return not title or not title:find("%S")
+end
+
 -- Creates a new pin. Returns the pin record on success, or nil + error string.
 function ns:CreatePin(fields)
-    if not fields or not fields.title or fields.title == "" then
+    if not fields or self:IsBlankTitle(fields.title) then
         return nil, "title is required"
     end
 
@@ -95,6 +99,7 @@ end
 function ns:UpdatePin(pinId, fields)
     local pin = self:GetPin(pinId)
     if not pin then return false, L.PIN_NOT_FOUND end
+    if fields.title ~= nil and self:IsBlankTitle(fields.title) then return false, L.TITLE_REQUIRED end
 
     if fields.title    ~= nil then pin.title    = fields.title end
     if fields.note     ~= nil then pin.note     = fields.note end

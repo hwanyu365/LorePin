@@ -7,7 +7,7 @@ local function pin_fields(over)
 end
 
 describe("PinManager", function()
-    it("TC#1 제목 nil·빈 문자열이면 생성 거부, 핀 수 그대로", function()
+    it("TC#1 제목 nil·빈 문자열·공백뿐이면 생성 거부, 글자가 있으면 생성", function()
         local ns = support.addon()
         local pin, err = ns:CreatePin(pin_fields({ title = "" }))
         eq(pin, nil)
@@ -15,8 +15,16 @@ describe("PinManager", function()
         pin = ns:CreatePin({ mapID = 1, x = 0, y = 0 })
         eq(pin, nil)
         eq(ns:CreatePin(nil), nil)
+        for _, blank in ipairs({ " ", "   ", string.char(9), " " .. string.char(10) .. " " }) do
+            eq(ns:CreatePin(pin_fields({ title = blank })), nil, "blank title " .. string.format("%q", blank))
+            eq(ns:IsBlankTitle(blank), true)
+        end
         eq(ns:GetPinCount(), 0)
         eq(ns.calls.worldMap, 0)
+
+        eq(ns:IsBlankTitle(" a "), false)
+        local spaced = ns:CreatePin(pin_fields({ title = "  a  " }))
+        eq(spaced.title, "  a  ")
     end)
 
     it("TC#2 핀 수가 maxPins 이면 거부하고 메시지에 한도를 담는다", function()
@@ -74,7 +82,7 @@ describe("PinManager", function()
         eq({ pin.mapID, pin.x, pin.y, pin.title, pin.note, pin.category }, { 2248, 0.1, 0.2, "t", "memo", "quest" })
     end)
 
-    it("TC#8 부분 수정은 넘긴 필드만 바꾸고 updatedAt 을 갱신, 없는 ID 는 실패", function()
+    it("TC#8 부분 수정은 넘긴 필드만 바꾸고 updatedAt 을 갱신, 없는 ID·공백 제목은 실패", function()
         local ns = support.addon({ now = 100 })
         local pin = ns:CreatePin(pin_fields({ note = "old" }))
         support.now = 200
@@ -88,6 +96,14 @@ describe("PinManager", function()
         eq(ok, false)
         eq(err, ns.L.PIN_NOT_FOUND)
         eq(pin.title, "New")
+
+        support.now = 300
+        local notified = ns.calls.worldMap
+        ok, err = ns:UpdatePin(pin.id, { title = "  ", note = "changed" })
+        eq(ok, false)
+        eq(err, ns.L.TITLE_REQUIRED)
+        eq({ pin.title, pin.note, pin.updatedAt }, { "New", "old", 200 })
+        eq(ns.calls.worldMap, notified)
     end)
 
     it("TC#9 삭제는 핀·지도 표시·TomTom 을 정리하고 갱신, 없는 ID 는 false", function()
