@@ -261,6 +261,7 @@ function Layout.SetBlockedReasons(btn, reasons)
     end
     btn._blockedReasons = reasons
     btn:SetEnabled(#reasons == 0)
+    if #reasons == 0 and GameTooltip:IsOwned(btn) then GameTooltip:Hide() end
 end
 
 -- Toggle visual state of a UIPanelButton safely (UIPanelButtonTemplate has
