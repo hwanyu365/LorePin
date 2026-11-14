@@ -148,6 +148,31 @@ describe("PinManager", function()
     end)
 end)
 
+describe("입력 판정", function()
+    it("TC#33 제목·좌표별 판정과 막힌 이유", function()
+        local ns = support.addon()
+        local T, C = ns.L.TITLE_REQUIRED, ns.L.INVALID_COORDINATES
+        local function check(title, x, y)
+            local ok, res = ns:CheckPinInput({ title = title, x = x, y = y })
+            return { ok, res.title, res.x, res.y, res.reasons }
+        end
+        eq(check("Cave", "50", "25.5"), { true, true, true, true, {} })
+        eq(check(nil, "50", "50"), { false, false, true, true, { T } })
+        eq(check("", "50", "50"), { false, false, true, true, { T } })
+        eq(check("  ", "50", "50"), { false, false, true, true, { T } })
+        eq(check("a", "0", "100"), { true, true, true, true, {} })
+        eq(check("a", "-0.1", "50"), { false, true, false, true, { C } })
+        eq(check("a", "50", "100.1"), { false, true, true, false, { C } })
+        eq(check("a", "abc", ""), { false, true, false, false, { C } })
+        eq(check(" ", "x", "1"), { false, false, false, true, { T, C } })
+
+        local ok, res = ns:CheckPinInput({ title = "a" })
+        eq({ ok, res.x, res.y, res.reasons }, { true, true, true, {} })
+        ok = ns:CheckPinInput({ title = " " })
+        eq(ok, false)
+    end)
+end)
+
 describe("길안내", function()
     local function stub_waypoint()
         local state = { wp = nil, tracked = false }

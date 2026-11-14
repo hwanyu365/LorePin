@@ -42,6 +42,24 @@ function ns:IsBlankTitle(title)
     return not title or not title:find("%S")
 end
 
+local function IsValidCoord(text)
+    local v = tonumber(text)
+    return v ~= nil and v >= 0 and v <= 100
+end
+
+-- 입력 문자열만으로 저장 가능 여부를 정한다. 좌표 키가 없으면(상세 패널) 제목만 본다.
+function ns:CheckPinInput(input)
+    local res = {
+        title = not self:IsBlankTitle(input.title),
+        x = input.x == nil or IsValidCoord(input.x),
+        y = input.y == nil or IsValidCoord(input.y),
+        reasons = {},
+    }
+    if not res.title then res.reasons[#res.reasons + 1] = L.TITLE_REQUIRED end
+    if not (res.x and res.y) then res.reasons[#res.reasons + 1] = L.INVALID_COORDINATES end
+    return #res.reasons == 0, res
+end
+
 -- Creates a new pin. Returns the pin record on success, or nil + error string.
 function ns:CreatePin(fields)
     if not fields or self:IsBlankTitle(fields.title) then

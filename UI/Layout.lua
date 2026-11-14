@@ -243,6 +243,26 @@ function Layout.CreateButtonRow(parent, specs, bottomOffset)
     return result
 end
 
+-- Enables the button only when reasons is empty; a disabled button shows the reasons on hover.
+function Layout.SetBlockedReasons(btn, reasons)
+    if not btn._reasonTooltip then
+        btn._reasonTooltip = true
+        -- WoW buttons ignore OnEnter while disabled unless this is set.
+        btn:SetMotionScriptsWhileDisabled(true)
+        btn:HookScript("OnEnter", function(self)
+            if self:IsEnabled() or not self._blockedReasons then return end
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            for _, r in ipairs(self._blockedReasons) do
+                GameTooltip:AddLine(r, 1.0, 0.2, 0.2, true)
+            end
+            GameTooltip:Show()
+        end)
+        btn:HookScript("OnLeave", function() GameTooltip:Hide() end)
+    end
+    btn._blockedReasons = reasons
+    btn:SetEnabled(#reasons == 0)
+end
+
 -- Toggle visual state of a UIPanelButton safely (UIPanelButtonTemplate has
 -- no reliable NormalTexture). When inactive: dim via alpha + text color.
 function Layout.SetButtonActive(btn, active, activeColor, inactiveColor)
