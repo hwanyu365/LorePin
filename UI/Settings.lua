@@ -126,12 +126,6 @@ function ns:InitSettings()
         function() return db.settings.showOnWorldMap end,
         function(v) db.settings.showOnWorldMap = v end,
         function() if ns.RefreshWorldMapPins then ns:RefreshWorldMapPins() end end)
-    y = y - CHECKBOX_SPACING
-
-    -- Show on Minimap
-    controls[#controls + 1] = CreateCheckbox(panel, MARGIN, y, L.SETTING_SHOW_MMAP,
-        function() return db.settings.showOnMinimap end,
-        function(v) db.settings.showOnMinimap = v end)
     y = y - CHECKBOX_SPACING - 6
 
     -- World map icon size
@@ -140,13 +134,6 @@ function ns:InitSettings()
         function() return db.settings.worldMapIconSize or 20 end,
         function(v) db.settings.worldMapIconSize = v end,
         function() if ns.RefreshWorldMapPins then ns:RefreshWorldMapPins() end end)
-    y = y - 48
-
-    -- Minimap icon size
-    controls[#controls + 1] = CreateSlider(panel, MARGIN, y,
-        L.SETTING_MMAP_SIZE, 8, 32, 1,
-        function() return db.settings.minimapIconSize or 16 end,
-        function(v) db.settings.minimapIconSize = v end)
     y = y - 48
 
     -- Max pins
