@@ -23,6 +23,8 @@ function support.stub_wow(opts)
         end,
     }
     TomTom = nil
+    UiMapPoint = nil
+    C_SuperTrack = nil
     LorePinDB = opts.db
 end
 

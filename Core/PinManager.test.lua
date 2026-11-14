@@ -170,6 +170,8 @@ describe("길안내", function()
         eq(state.wp, nil)
 
         eq(ns:ToggleWaypointForPin({ id = 9, x = 0, y = 0 }), nil)
+        UiMapPoint.CreateFromCoordinates = function() error("api failure") end
+        eq(ns:ToggleWaypointForPin(pin), nil)
         C_Map.SetUserWaypoint = nil
         eq(ns:ToggleWaypointForPin(pin), nil)
     end)

@@ -73,7 +73,7 @@
 
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
-| `TC#26` | 기본 웨이포인트: 활성 판정(같은 지도·0.001 경계·다른 지도), 토글 added·removed, mapID·API 없음 → nil | [FR#21] | |
+| `TC#26` | 기본 웨이포인트: 활성 판정(같은 지도·x/y 0.001 경계·다른 지도), 토글 added·removed, mapID·API 없음·API 오류 → nil | [FR#21] | |
 | `TC#27` | TomTom: 없음 → nil·메시지, added(옵션 값)·removed, 생성 실패 → nil | [FR#22] | |
 | `TC#28` | 핀 삭제 시 TomTom 웨이포인트 제거, TomTom 없을 때 기록만 제거 | [FR#23] | |
 | `TC#29` | 버튼 강조·TomTom 없을 때 비활성 | [FR#24] | (수동) 게임 내 |

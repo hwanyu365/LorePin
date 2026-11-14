@@ -55,7 +55,7 @@ SDD + TDD: 이슈 → 스펙 갱신 → TC 작성(Red) → 구현(Green) → Ref
 - 테스트 위치: 소스와 같은 디렉터리에 `{file}.test.lua` 로 둔다. 검증 명령이 `scripts/test.lua`(Lua 5.1 자체 러너)로 실행한다.
   - 테스트는 WoW 런타임 밖에서 돈다 → WoW API 에 의존하지 않는 로직만 자동 테스트하고, UI·월드맵 렌더링은 스펙 TC 비고에 `(수동)` 으로 둔다.
   - 소스 파일은 `load_source(path, ns)` 로 TOC 로드와 같은 인자(`"LorePin", ns`)로 불러오고, WoW API 대역은 테스트 파일의 전역으로 넣는다.
-  - Core 로드와 공용 WoW API 대역은 `scripts/test-support.lua` 를 쓴다 → 호출마다 새 `ns`·`LorePinDB` 라 테스트끼리 상태가 섞이지 않는다.
+  - Core 로드와 공용 WoW API 대역은 `scripts/test-support.lua` 를 쓴다 → 호출마다 새 `ns`·`LorePinDB` 와 대역 전역을 다시 정해 테스트끼리 상태가 섞이지 않는다. 새 대역 전역은 `stub_wow` 와 `.luacheckrc` 허용 목록에 함께 넣는다.
 - 리뷰 지적을 고칠 때는 같은 입력이 들어오는 자리를 먼저 전수로 세고 자리마다 테스트를 추가한 뒤 고친다 (`/adk:tdd` "지적 반영").
 - 테스트 이름은 스펙의 `TC#n` 으로 시작한다. TC 번호는 저장소 전체에서 고유하다 (`docs/rules_spec.md` §2).
 - 같은 TC 를 통과시키려는 수정이 3번 실패하면 멈추고 보고한다.

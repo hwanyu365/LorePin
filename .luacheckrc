@@ -23,5 +23,7 @@ globals = {
 exclude_files = { "scripts/test-fixtures/" }
 
 -- 테스트는 WoW API 대역을 전역으로 넣는다 → load_source 로 불러온 소스가 그 대역을 전역으로 본다.
-files["**/*.test.lua"] = { ignore = { "111" } }
-files["scripts/test-support.lua"] = { ignore = { "111" } }
+-- 111 을 끄지 않고 대역 이름만 허용한다 → 오타로 만든 전역은 계속 잡힌다.
+local wowStubs = { "time", "UnitName", "GetRealmName", "GetLocale", "wipe", "C_Map", "TomTom", "UiMapPoint", "C_SuperTrack" }
+files["**/*.test.lua"] = { globals = wowStubs }
+files["scripts/test-support.lua"] = { globals = wowStubs }
