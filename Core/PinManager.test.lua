@@ -82,7 +82,7 @@ describe("PinManager", function()
         eq({ pin.mapID, pin.x, pin.y, pin.title, pin.note, pin.category }, { 2248, 0.1, 0.2, "t", "memo", "quest" })
     end)
 
-    it("TC#8 부분 수정은 넘긴 필드만 바꾸고 updatedAt 을 갱신, 없는 ID 는 실패", function()
+    it("TC#8 부분 수정은 넘긴 필드만 바꾸고 updatedAt 을 갱신, 없는 ID·공백 제목은 실패", function()
         local ns = support.addon({ now = 100 })
         local pin = ns:CreatePin(pin_fields({ note = "old" }))
         support.now = 200
@@ -96,6 +96,14 @@ describe("PinManager", function()
         eq(ok, false)
         eq(err, ns.L.PIN_NOT_FOUND)
         eq(pin.title, "New")
+
+        support.now = 300
+        local notified = ns.calls.worldMap
+        ok, err = ns:UpdatePin(pin.id, { title = "  ", note = "changed" })
+        eq(ok, false)
+        eq(err, ns.L.TITLE_REQUIRED)
+        eq({ pin.title, pin.note, pin.updatedAt }, { "New", "old", 200 })
+        eq(ns.calls.worldMap, notified)
     end)
 
     it("TC#9 삭제는 핀·지도 표시·TomTom 을 정리하고 갱신, 없는 ID 는 false", function()

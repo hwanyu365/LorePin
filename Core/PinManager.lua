@@ -99,6 +99,7 @@ end
 function ns:UpdatePin(pinId, fields)
     local pin = self:GetPin(pinId)
     if not pin then return false, L.PIN_NOT_FOUND end
+    if fields.title ~= nil and self:IsBlankTitle(fields.title) then return false, L.TITLE_REQUIRED end
 
     if fields.title    ~= nil then pin.title    = fields.title end
     if fields.note     ~= nil then pin.note     = fields.note end
