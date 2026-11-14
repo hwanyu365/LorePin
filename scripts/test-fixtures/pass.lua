@@ -1,0 +1,15 @@
+describe("pass", function()
+    it("eq on nested tables", function()
+        eq({ a = 1, b = { 2, 3 } }, { a = 1, b = { 2, 3 } })
+    end)
+    it("raises with pattern", function()
+        raises(function() error("boom") end, "boom")
+    end)
+    it("load_source passes addon name and ns, and sees env stubs", function()
+        stub_value = 7
+        local ns = {}
+        load_source("scripts/test-fixtures/source.lua", ns)
+        eq(ns.name, "LorePin")
+        eq(ns.stub, 7)
+    end)
+end)
