@@ -26,6 +26,7 @@ function support.stub_wow(opts)
     UiMapPoint = nil
     C_SuperTrack = nil
     UIErrorsFrame = nil
+    C_AddOns = nil
     LorePinDB = opts.db
 end
 

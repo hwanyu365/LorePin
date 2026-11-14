@@ -34,3 +34,20 @@ describe("Config", function()
         eq(ns:GetPinCount(), 1)
     end)
 end)
+
+describe("버전 표시", function()
+    it("TC#36 설정 제목은 TOC 버전을 쓰고, 읽지 못하면 이름만", function()
+        local ns = support.addon()
+        local asked = {}
+        C_AddOns = { GetAddOnMetadata = function(name, field) asked[#asked + 1] = { name, field }; return "1.2.3" end }
+        eq(ns:GetSettingsTitle(), "LorePin v1.2.3")
+        eq(asked, { { "LorePin", "Version" } })
+
+        C_AddOns = { GetAddOnMetadata = function() return nil end }
+        eq(ns:GetSettingsTitle(), "LorePin")
+        C_AddOns = { GetAddOnMetadata = function() return "" end }
+        eq(ns:GetSettingsTitle(), "LorePin")
+        C_AddOns = nil
+        eq(ns:GetSettingsTitle(), "LorePin")
+    end)
+end)
