@@ -397,7 +397,7 @@ function ns:ShowPinPopup(opts)
     -- Save: validate coords + title, then create
     f.saveButton:SetScript("OnClick", function()
         local title = f.titleEdit:GetText() or ""
-        if title == "" then
+        if self:IsBlankTitle(title) then
             self:Print(L.TITLE_REQUIRED)
             return
         end

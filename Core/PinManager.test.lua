@@ -7,7 +7,7 @@ local function pin_fields(over)
 end
 
 describe("PinManager", function()
-    it("TC#1 제목 nil·빈 문자열이면 생성 거부, 핀 수 그대로", function()
+    it("TC#1 제목 nil·빈 문자열·공백뿐이면 생성 거부, 글자가 있으면 생성", function()
         local ns = support.addon()
         local pin, err = ns:CreatePin(pin_fields({ title = "" }))
         eq(pin, nil)
@@ -15,8 +15,16 @@ describe("PinManager", function()
         pin = ns:CreatePin({ mapID = 1, x = 0, y = 0 })
         eq(pin, nil)
         eq(ns:CreatePin(nil), nil)
+        for _, blank in ipairs({ " ", "   ", string.char(9), " " .. string.char(10) .. " " }) do
+            eq(ns:CreatePin(pin_fields({ title = blank })), nil, "blank title " .. string.format("%q", blank))
+            eq(ns:IsBlankTitle(blank), true)
+        end
         eq(ns:GetPinCount(), 0)
         eq(ns.calls.worldMap, 0)
+
+        eq(ns:IsBlankTitle(" a "), false)
+        local spaced = ns:CreatePin(pin_fields({ title = "  a  " }))
+        eq(spaced.title, "  a  ")
     end)
 
     it("TC#2 핀 수가 maxPins 이면 거부하고 메시지에 한도를 담는다", function()

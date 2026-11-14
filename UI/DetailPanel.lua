@@ -270,7 +270,7 @@ function ns:ShowPinDetail(pinId)
     -- Save button: persist changes, re-sync view
     f.btnSave:SetScript("OnClick", function()
         local title = f.titleEdit:GetText() or ""
-        if title == "" then
+        if ns:IsBlankTitle(title) then
             ns:Print(L.TITLE_REQUIRED)
             return
         end
