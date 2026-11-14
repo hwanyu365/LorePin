@@ -6,9 +6,7 @@ local DEFAULTS = {
     customCategories = {},   -- user-defined categories
     settings = {
         showOnWorldMap    = true,
-        showOnMinimap     = true,
         worldMapIconSize  = 20,
-        minimapIconSize   = 16,
         maxPins           = 500,
     },
 }

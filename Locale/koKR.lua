@@ -68,9 +68,7 @@ L.TOMTOM_NOT_LOADED   = "TomTom 애드온이 설치되지 않았습니다."
 
 -- Settings
 L.SETTING_SHOW_WMAP   = "월드맵에 핀 표시"
-L.SETTING_SHOW_MMAP   = "미니맵에 핀 표시"
 L.SETTING_WMAP_SIZE   = "월드맵 아이콘 크기"
-L.SETTING_MMAP_SIZE   = "미니맵 아이콘 크기"
 L.SETTING_MAX_PINS    = "최대 핀 개수"
 L.SETTING_RESET_PINS       = "모든 핀 초기화"
 L.SETTING_RESET_PINS_CONFIRM = "모든 핀을 삭제하시겠습니까? 되돌릴 수 없습니다."
