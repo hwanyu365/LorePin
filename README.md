@@ -8,7 +8,7 @@ Pin personal notes to locations on the World of Warcraft world map.
 
 - **Personal Pins**: Drop pins at any location with your own title and note
 - **Categories**: Organize pins by category (Quest, Danger, Gather, Scenic, Complete) with custom categories support
-- **World Map & Minimap**: View your pins on the world map and minimap
+- **World Map**: View your pins on the world map
 - **Account-wide**: All your characters share the same pin database
 - **Search, Filter & Sort**: Search pins by title or note, filter by category, sort by date or map
 - **Localization**: English and Korean supported
