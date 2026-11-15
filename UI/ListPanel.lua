@@ -172,6 +172,7 @@ local function EnsurePanel()
 
     local f = CreateFrame("Frame", "LorePinListPanel", UIParent, "BackdropTemplate")
     f:SetSize(540, 556)
+    Layout.CloseOnEscape(f)
     f:SetPoint("CENTER")
     f:SetFrameStrata("MEDIUM")
     f:SetToplevel(true)

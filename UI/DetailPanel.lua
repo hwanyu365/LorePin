@@ -45,6 +45,7 @@ local function EnsurePanel()
     local Layout = ns.Layout
 
     local f = Layout.CreateDialog("LorePinDetailPanel", 440, 400, L.DETAIL_TITLE)
+    Layout.CloseOnEscape(f, function(self) self.attemptClose() end, { "LOREPIN_CONFIRM_DISCARD", "LOREPIN_CONFIRM_DELETE" })
 
     -- Dirty marker in the title bar
     f.dirtyMarker = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -367,6 +368,7 @@ function ns:ShowPinDetail(pinId)
             f:Hide()
         end
     end
+    f.attemptClose = AttemptClose
     f.btnClose:SetScript("OnClick", AttemptClose)
     f.closeBtn:SetScript("OnClick", AttemptClose)
 

@@ -68,6 +68,28 @@ function Layout.ApplyDialogBackdrop(f)
     f:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
 end
 
+-- WoW delivers a key to the topmost keyboard-enabled frame first, so ESC closes only the window on top.
+-- Key propagation is not touched in combat because the call can be blocked there; ESC then also reaches the game menu.
+function Layout.CloseOnEscape(f, onEscape, dialogs)
+    f:EnableKeyboard(true)
+    f:SetScript("OnKeyDown", function(self, key)
+        local isEscape = key == "ESCAPE"
+        if not InCombatLockdown() then self:SetPropagateKeyboardInput(not isEscape) end
+        if not isEscape then return end
+        for _, name in ipairs(dialogs or {}) do
+            if StaticPopup_Visible(name) then
+                StaticPopup_Hide(name)
+                return
+            end
+        end
+        if onEscape then onEscape(self) else self:Hide() end
+    end)
+    -- A window kept open by a confirm dialog must not keep swallowing keys if combat starts.
+    f:SetScript("OnKeyUp", function(self)
+        if not InCombatLockdown() then self:SetPropagateKeyboardInput(true) end
+    end)
+end
+
 -- Create a movable, toplevel dialog with a title and a close button.
 -- Returns the frame. Access `f.title` (FontString) and `f.closeBtn` (Button).
 function Layout.CreateDialog(name, w, h, titleText)

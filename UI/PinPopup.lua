@@ -217,6 +217,7 @@ local function EnsureDialog()
     local Layout = ns.Layout
 
     local f = Layout.CreateDialog("LorePinPopup", 440, 400, L.POPUP_TITLE)
+    Layout.CloseOnEscape(f)
 
     -- Row 1: Location (map name, read-only)
     local yLoc = -50
