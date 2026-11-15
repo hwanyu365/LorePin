@@ -9,9 +9,24 @@
 - `CHANGELOG.md` 에 이번 버전 절이 있음 → CurseForge 업로드의 changelog 가 이 절이다
 - `sh .github/spec-trace.sh` 의 `M MANUAL` TC 마다 게임 내 확인한 방법과 결과 → 하나라도 비면 태그를 만들지 않는다
   - PR 마다 게임 내 확인 결과를 PR 에 남기므로, 그 기록으로 갈음한다. TC 마다 확인한 PR 을 릴리스 노트 초안에 적는다.
-  - 갈음하는 조건: 그 PR 의 확인 커밋부터 태그 대상 커밋까지 런타임 파일(`*.lua`·`*.toc`, 테스트 제외) 변경이 `## Version` 줄뿐 (`git diff --stat <확인 커밋>..<태그 대상> -- '*.lua' '*.toc'`).
-  - 그 밖의 런타임 변경이 있으면 그 변경이 닿는 TC 만 태그 대상 커밋으로 다시 확인한다.
-- 3(이전 버전에서의 업데이트)은 `LorePinDB` 기본값·구조(`Core/Config.lua`)가 직전 릴리스와 다를 때만 게임 내에서 확인한다. 같으면 `git diff <직전 태그>..<태그 대상> -- Core/Config.lua` 결과로 갈음한다.
+  - 갈음하는 조건: 그 PR 의 확인 커밋부터 태그 대상 커밋까지 아래 허용 목록 밖의 변경이 없다. 허용 목록 밖이 하나라도 바뀌었으면 그 변경이 닿는 TC 를 태그 대상 커밋으로 다시 확인한다.
+
+    | 바뀌어도 되는 것 | 이유 |
+    | --- | --- |
+    | `LorePin.toc` 의 `## Version` 줄 | 버전 표시만 바뀐다 |
+    | `docs/`, `*.md` | 문서 |
+    | `*.test.lua`, `scripts/` | 테스트·검증 도구, 배포 파일에 실리지 않는다 |
+    | `.github/`, `.claude/`, `.githooks/`, `.luacheckrc`, `.editorconfig`, `.gitattributes`, `.gitignore` | CI·개발 설정 |
+
+  - 판정 명령: 아래 출력이 `LorePin.toc` 의 `## Version` 줄 변경뿐이면 갈음한다 (줄 단위라 `.toc` 의 다른 줄 변경도 보인다).
+
+    ```sh
+    git diff -U0 <확인 커밋>..<태그 대상> -- . ':!docs' ':!*.md' ':!*.test.lua' ':!scripts' ':!.github' ':!.claude' ':!.githooks' ':!.luacheckrc' ':!.editorconfig' ':!.gitattributes' ':!.gitignore'
+    ```
+
+- §3(이전 버전에서의 업데이트)은 저장 데이터를 바꾸는 릴리스에서만 게임 내에서 확인한다.
+  - 저장 데이터를 정하는 파일: `Core/Config.lua`(`LorePinDB` 키·기본값), `Core/PinManager.lua`(핀 레코드), `Core/CategoryManager.lua`(사용자 카테고리 레코드).
+  - `git diff <직전 태그>..<태그 대상> -- Core/Config.lua Core/PinManager.lua Core/CategoryManager.lua` 에서 저장 키·레코드 필드의 추가·삭제·이름 변경·기존 값의 의미 변경이 없으면 갈음한다. 판정 근거를 릴리스 노트 초안에 적는다.
 
 ## 2. 게임 내 확인 (태그 대상 커밋)
 
