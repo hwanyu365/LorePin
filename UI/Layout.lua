@@ -289,26 +289,6 @@ function Layout.SetBlockedReasons(btn, reasons)
     if #reasons == 0 and GameTooltip:IsOwned(btn) then GameTooltip:Hide() end
 end
 
--- Toggle visual state of a UIPanelButton safely (UIPanelButtonTemplate has
--- no reliable NormalTexture). When inactive: dim via alpha + text color.
-function Layout.SetButtonActive(btn, active, activeColor, inactiveColor)
-    if active then
-        btn:LockHighlight()
-        btn:SetAlpha(1.0)
-        if activeColor then
-            local fs = btn:GetFontString()
-            if fs then fs:SetTextColor(activeColor.r, activeColor.g, activeColor.b) end
-        end
-    else
-        btn:UnlockHighlight()
-        btn:SetAlpha(0.55)
-        if inactiveColor then
-            local fs = btn:GetFontString()
-            if fs then fs:SetTextColor(inactiveColor.r, inactiveColor.g, inactiveColor.b) end
-        end
-    end
-end
-
 -- Fully enable/disable a button (unclickable when disabled).
 function Layout.SetButtonDisabled(btn, disabled)
     if disabled then
@@ -317,39 +297,5 @@ function Layout.SetButtonDisabled(btn, disabled)
     else
         btn:Enable()
         btn:SetAlpha(1.0)
-    end
-end
-
--- Arrange a list of buttons in a single row with equal widths spanning the
--- full width of a container. Useful for filter button rows.
-function Layout.EquallyDistributeButtons(container, buttons, gap)
-    gap = gap or 4
-    local n = #buttons
-    if n == 0 then return end
-
-    -- Prefer container's own width; fall back to parent width minus margins.
-    -- If the container is two-point anchored, its width may not resolve
-    -- until after Show().
-    local totalW = container:GetWidth()
-    if not totalW or totalW < 50 then
-        local parent = container:GetParent()
-        if parent and parent:GetWidth() then
-            totalW = parent:GetWidth() - 2 * Layout.MARGIN
-        else
-            totalW = 500
-        end
-    end
-
-    local btnW = math.floor((totalW - gap * (n - 1)) / n)
-    local prev
-    for _, btn in ipairs(buttons) do
-        btn:ClearAllPoints()
-        btn:SetWidth(btnW)
-        if not prev then
-            btn:SetPoint("LEFT", container, "LEFT", 0, 0)
-        else
-            btn:SetPoint("LEFT", prev, "RIGHT", gap, 0)
-        end
-        prev = btn
     end
 end
