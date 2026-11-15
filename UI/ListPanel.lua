@@ -256,78 +256,75 @@ local function EnsurePanel()
     end)
     f.UpdateSortText = UpdateSortText
 
-    -- Category filter buttons (single row)
-    local filterContainer = CreateFrame("Frame", nil, f)
-    filterContainer:SetPoint("TOPLEFT", MARGIN, -88)
-    filterContainer:SetPoint("RIGHT", f, "RIGHT", -MARGIN, 0)
-    filterContainer:SetHeight(24)
-    f.filterContainer = filterContainer
+    -- Category filter: multi-select dropdown, so the header width stays fixed however many categories exist.
+    local filterLabel = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    filterLabel:SetPoint("TOPLEFT", MARGIN, -94)
+    filterLabel:SetText(L.LIST_FILTER_LABEL)
 
-    -- Button state helpers use Layout.SetButtonActive for safe highlight +
-    -- alpha toggling (UIPanelButtonTemplate has no reliable NormalTexture).
-    local function ApplyButtonState(btn, cat, active)
-        local dim = { r = cat.color.r * 0.7, g = cat.color.g * 0.7, b = cat.color.b * 0.7 }
-        Layout.SetButtonActive(btn, active, cat.color, dim)
+    local filterDropdown = CreateFrame("Frame", "LorePinListFilterDropdown", f, "UIDropDownMenuTemplate")
+    filterDropdown:SetPoint("LEFT", filterLabel, "RIGHT", -4, -2)
+    UIDropDownMenu_SetWidth(filterDropdown, 200)
+    f.filterDropdown = filterDropdown
+
+    local function RefreshFilterText()
+        UIDropDownMenu_SetText(filterDropdown, ns:DescribeCategoryFilter(state.activeCategories))
     end
 
-    local function ApplyAllButtonState(btn, allActive)
-        Layout.SetButtonActive(btn, allActive,
-            { r = 1, g = 1, b = 1 },
-            { r = 0.7, g = 0.7, b = 0.7 })
+    -- Row layout is [icon] [name] ... [check]. UIDropDownMenu only draws its check on the left,
+    -- so rows are not checkable and the right-side icon slot draws the check box instead.
+    local CHECK_TEXTURE = [[Interface\Common\UI-DropDownRadioChecks]]
+    local ALL_VALUE = "__all"
+
+    local function IsRowChecked(value)
+        if value == ALL_VALUE then return not HasAnyFilter() end
+        return IsCategoryActive(value)
     end
 
-    local function RebuildCategoryFilters()
-        if f.filterButtons then
-            for _, b in ipairs(f.filterButtons) do b:Hide(); b:SetParent(nil) end
+    local function ApplyCheck(icon, checked)
+        if checked then icon:SetTexCoord(0, 0.5, 0, 0.5) else icon:SetTexCoord(0.5, 1, 0, 0.5) end
+    end
+
+    -- Every row changes when [All] is pressed, so all visible rows are redrawn after any click.
+    local function RefreshOpenChecks()
+        local list = _G["DropDownList1"]
+        if not list or list.dropdown ~= filterDropdown then return end
+        for i = 1, list.numButtons or 0 do
+            local row = _G["DropDownList1Button" .. i]
+            local icon = row and (row.Icon or _G[row:GetName() .. "Icon"])
+            if icon and row.value ~= nil then ApplyCheck(icon, IsRowChecked(row.value)) end
         end
-        f.filterButtons = {}
-        f.catFilterButtons = {}
+    end
 
-        -- "All" button — clears filter
-        local allBtn = CreateFrame("Button", nil, filterContainer, "UIPanelButtonTemplate")
-        allBtn:SetHeight(22)
-        allBtn:SetText(L.LIST_FILTER_ALL)
-        allBtn:SetScript("OnClick", function()
-            ClearCategoryFilter()
+    local function AddRow(level, text, value, onClick)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = text
+        info.value = value
+        info.notCheckable = true
+        info.keepShownOnClick = true
+        info.icon = CHECK_TEXTURE
+        local checked = IsRowChecked(value)
+        info.tCoordLeft, info.tCoordRight = checked and 0 or 0.5, checked and 0.5 or 1
+        info.tCoordTop, info.tCoordBottom = 0, 0.5
+        info.func = function(btn)
+            onClick(btn.value)
+            RefreshFilterText()
             ns:RefreshPinList()
-        end)
-        f.allFilterButton = allBtn
-        table.insert(f.filterButtons, allBtn)
+            RefreshOpenChecks()
+        end
+        UIDropDownMenu_AddButton(info, level)
+    end
 
+    UIDropDownMenu_Initialize(filterDropdown, function(_, level)
+        AddRow(level, L.LIST_FILTER_ALL, ALL_VALUE, function() ClearCategoryFilter() end)
         for _, cat in ipairs(ns:GetCategories()) do
-            local btn = CreateFrame("Button", nil, filterContainer, "UIPanelButtonTemplate")
-            btn:SetHeight(22)
-            btn:SetText(cat.name)
-            btn._cat = cat
-            btn:SetScript("OnClick", function(self)
-                ToggleCategory(self._cat.id)
-                ns:RefreshPinList()
-            end)
-            table.insert(f.filterButtons, btn)
-            f.catFilterButtons[cat.id] = btn
+            local color = string.format("|cff%02x%02x%02x", cat.color.r * 255, cat.color.g * 255, cat.color.b * 255)
+            local text = string.format("|T%s:16:16|t %s%s|r", cat.icon, color, cat.name)
+            AddRow(level, text, cat.id, ToggleCategory)
         end
+    end)
 
-        -- Layout helper distributes all buttons across the container width
-        Layout.EquallyDistributeButtons(filterContainer, f.filterButtons, 4)
-
-        -- Apply initial visual state
-        ApplyAllButtonState(allBtn, not HasAnyFilter())
-        for catId, btn in pairs(f.catFilterButtons) do
-            ApplyButtonState(btn, btn._cat, IsCategoryActive(catId))
-        end
-    end
-    f.RebuildCategoryFilters = RebuildCategoryFilters
-
-    f.RefreshFilterStates = function()
-        if f.allFilterButton then
-            ApplyAllButtonState(f.allFilterButton, not HasAnyFilter())
-        end
-        if f.catFilterButtons then
-            for catId, btn in pairs(f.catFilterButtons) do
-                ApplyButtonState(btn, btn._cat, IsCategoryActive(catId))
-            end
-        end
-    end
+    f.RebuildCategoryFilters = RefreshFilterText
+    f.RefreshFilterStates = RefreshFilterText
 
     -- Scrollable list area with a dark inset background, similar to the
     -- note box in PinPopup/DetailPanel. The background makes the list
@@ -435,8 +432,6 @@ function ns:ShowPinList()
     local f = EnsurePanel()
     f.searchEdit:SetText(state.searchText or "")
     f.UpdateSortText()
-    -- Show BEFORE building filters so filterContainer:GetWidth() returns the
-    -- correct layout-resolved width for even button distribution.
     f:Show()
     f.RebuildCategoryFilters()
     self:RefreshPinList()

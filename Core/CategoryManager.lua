@@ -180,3 +180,17 @@ function ns:DropUnknownCategories(set)
     end
     return set
 end
+
+function ns:DescribeCategoryFilter(set)
+    local count, only = 0, nil
+    for id in pairs(set) do
+        local cat = self:GetCategoryById(id)
+        if cat then
+            count = count + 1
+            only = cat
+        end
+    end
+    if count == 0 then return L.LIST_FILTER_ALL end
+    if count == 1 then return only.name end
+    return string.format(L.LIST_FILTER_COUNT, count)
+end
