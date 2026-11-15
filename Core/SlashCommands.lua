@@ -38,7 +38,7 @@ local function HandleSlashCommand(input)
     end
 
     -- First token
-    local cmd, rest = input:match("^(%S+)%s*(.*)$")
+    local cmd = input:match("^(%S+)")
     cmd = cmd and cmd:lower() or ""
 
     if cmd == "help" or cmd == "?" then
@@ -60,35 +60,6 @@ local function HandleSlashCommand(input)
             Settings.OpenToCategory(ns.settingsCategory:GetID())
         else
             ns:Print("Settings panel not ready.")
-        end
-        return
-    end
-
-    if cmd == "delete" or cmd == "del" or cmd == "rm" then
-        local pinId = tonumber(rest)
-        if not pinId then
-            ns:Print("Usage: /lp delete <pinId>")
-            return
-        end
-        local ok, pin = ns:DeletePin(pinId)
-        if ok then
-            ns:Print(string.format(L.PIN_DELETED, pin.title or ""))
-        else
-            ns:Print(L.PIN_NOT_FOUND)
-        end
-        return
-    end
-
-    if cmd == "detail" or cmd == "show" or cmd == "view" then
-        local pinId = tonumber(rest)
-        if not pinId then
-            ns:Print("Usage: /lp detail <pinId>")
-            return
-        end
-        if ns.ShowPinDetail then
-            ns:ShowPinDetail(pinId)
-        else
-            ns:Print(L.PIN_NOT_FOUND)
         end
         return
     end
