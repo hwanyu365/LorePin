@@ -284,10 +284,14 @@ function ns:ShowPinDetail(pinId)
         })
         ns:Print(string.format(L.PIN_UPDATED, title))
 
-        -- Re-read from DB (pin fields updated in-place by PinManager)
-        f.originalPin.title    = title
-        f.originalPin.note     = f.noteEdit:GetText() or ""
-        f.originalPin.category = f.selectedCategory
+        -- The stored category can differ from the selection when that category was deleted meanwhile.
+        local saved = ns:GetPin(pin.id)
+        f.originalPin.title    = saved.title
+        f.originalPin.note     = saved.note
+        f.originalPin.category = saved.category
+        f.selectedCategory     = saved.category
+        f.UpdateDropdownText()
+        RefreshIcon()
         f.isDirty = false
         RefreshDirtyState(f)
     end)

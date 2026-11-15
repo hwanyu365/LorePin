@@ -163,10 +163,12 @@ function ns:DeleteCustomCategory(id)
     for _, pin in ipairs(self:GetAllPins()) do
         if pin.category == id then doomed[#doomed + 1] = pin.id end
     end
-    for _, pinId in ipairs(doomed) do self:DeletePin(pinId) end
     self:RemoveCustomCategory(id)
-    if self.RefreshWorldMapPins then self:RefreshWorldMapPins() end
-    if self.RefreshPinList      then self:RefreshPinList()      end
+    self:DeletePins(doomed)
+    if #doomed == 0 then
+        if self.RefreshWorldMapPins then self:RefreshWorldMapPins() end
+        if self.RefreshPinList      then self:RefreshPinList()      end
+    end
     return #doomed
 end
 

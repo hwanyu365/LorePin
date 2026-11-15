@@ -95,8 +95,11 @@ describe("사용자 카테고리 만들기·지우기", function()
         local h1, h2 = pin("h1", herbs.id), pin("h2", herbs.id)
         local o1, g1 = pin("o1", ore.id), pin("g1", "gather")
         ns.calls.removedFromMap = {}
+        local mapBefore, listBefore = ns.calls.worldMap, ns.calls.list
 
         eq(ns:DeleteCustomCategory(herbs.id), 2)
+        eq(ns.calls.worldMap - mapBefore, 1)
+        eq(ns.calls.list - listBefore, 1)
         eq(ns:GetCategoryById(herbs.id), nil)
         eq(ns:GetAllPins(), { o1, g1 })
         eq(ns.calls.removedFromMap, { h1.id, h2.id })

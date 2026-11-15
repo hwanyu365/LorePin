@@ -132,17 +132,32 @@ function ns:UpdatePin(pinId, fields)
     return true
 end
 
-function ns:DeletePin(pinId)
-    for i, pin in ipairs(self.db.pins) do
+local function RemovePin(pinId)
+    for i, pin in ipairs(ns.db.pins) do
         if pin.id == pinId then
-            table.remove(self.db.pins, i)
+            table.remove(ns.db.pins, i)
             if ns.RemovePinFromMap  then ns:RemovePinFromMap(pinId) end
             if ns.ClearTomTomForPin then ns:ClearTomTomForPin(pinId) end
-            NotifyChanged()
-            return true, pin
+            return pin
         end
     end
-    return false, nil
+end
+
+function ns:DeletePin(pinId)
+    local pin = RemovePin(pinId)
+    if not pin then return false, nil end
+    NotifyChanged()
+    return true, pin
+end
+
+-- Refreshes the map and list once for the whole batch.
+function ns:DeletePins(pinIds)
+    local removed = 0
+    for _, pinId in ipairs(pinIds) do
+        if RemovePin(pinId) then removed = removed + 1 end
+    end
+    if removed > 0 then NotifyChanged() end
+    return removed
 end
 
 function ns:GetPinsForMap(mapID)
