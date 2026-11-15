@@ -313,3 +313,37 @@ describe("목록 필터·정렬", function()
         eq(ns:SortPins(list, "newest"), { b, c, a })
     end)
 end)
+
+describe("고른 핀 일괄 처리", function()
+    it("TC#45 선택 정리·일괄 카테고리 변경·일괄 삭제", function()
+        local ns = support.addon()
+        support.now = 100
+        local a = ns:CreatePin(pin_fields({ title = "a", category = "general" }))
+        local b = ns:CreatePin(pin_fields({ title = "b", category = "general" }))
+        local c = ns:CreatePin(pin_fields({ title = "c", category = "quest" }))
+
+        local selected = { [a.id] = true, [c.id] = true, [999] = true }
+        eq(ns:KeepVisibleSelection(selected, { a, b }), 1)
+        eq(selected, { [a.id] = true })
+
+        support.now = 200
+        local mapBefore, listBefore = ns.calls.worldMap, ns.calls.list
+        eq(ns:SetPinsCategory({ a.id, b.id, 999 }, "danger"), 2)
+        eq({ a.category, b.category, c.category }, { "danger", "danger", "quest" })
+        eq({ a.updatedAt, b.updatedAt, c.updatedAt }, { 200, 200, 100 })
+        eq(ns.calls.worldMap - mapBefore, 1)
+        eq(ns.calls.list - listBefore, 1)
+        eq(ns:SetPinsCategory({ a.id }, "nope"), nil)
+        eq(a.category, "danger")
+        eq(ns:SetPinsCategory({}, "quest"), 0)
+
+        ns.calls.removedFromMap = {}
+        mapBefore, listBefore = ns.calls.worldMap, ns.calls.list
+        eq(ns:DeletePins({ a.id, c.id, 999 }), 2)
+        eq(ns:GetAllPins(), { b })
+        eq(ns.calls.removedFromMap, { a.id, c.id })
+        eq(ns.calls.worldMap - mapBefore, 1)
+        eq(ns.calls.list - listBefore, 1)
+        eq(ns:DeletePins({}), 0)
+    end)
+end)
