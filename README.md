@@ -7,10 +7,11 @@ Pin personal notes to locations on the World of Warcraft world map.
 ## Features
 
 - **Personal Pins**: Drop pins at any location with your own title and note
-- **Categories**: Organize pins by category (Quest, Danger, Gather, Scenic, Complete) with custom categories support
+- **Categories**: Organize pins by category (General, Quest, Danger, Gather, Scenic, Complete), and create your own with a name, icon and color in the settings panel
 - **World Map**: View your pins on the world map
 - **Account-wide**: All your characters share the same pin database
-- **Search, Filter & Sort**: Search pins by title or note, filter by category, sort by date or map
+- **Search, Filter & Sort**: Search pins by title or note, filter by one or more categories, sort by date or map
+- **Bulk Edit**: Select pins in the list to change their category or delete them at once
 - **Localization**: English and Korean supported
 
 ## Why LorePin?
