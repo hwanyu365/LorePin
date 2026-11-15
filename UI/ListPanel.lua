@@ -12,7 +12,15 @@ local state = {
     searchText       = "",
     activeCategories = {},
     sortMode         = "newest",  -- newest | oldest | map
+    selected         = {},        -- { [pinId] = true }, only pins visible in the list
 }
+
+local function SelectedIds()
+    local ids = {}
+    for id in pairs(state.selected) do ids[#ids + 1] = id end
+    table.sort(ids)
+    return ids
+end
 
 local function HasAnyFilter()
     for _ in pairs(state.activeCategories) do return true end
@@ -47,8 +55,20 @@ local function CreateRow(parent)
     hl:SetAllPoints()
     hl:SetColorTexture(1, 1, 1, 0.08)
 
+    -- A child button takes the click, so ticking it does not open the detail panel.
+    local check = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
+    check:SetSize(24, 24)
+    check:SetPoint("LEFT", 0, 0)
+    check:SetScript("OnClick", function(self)
+        local pin = row.pinData
+        if not pin then return end
+        state.selected[pin.id] = self:GetChecked() and true or nil
+        if ns.RefreshSelectionBar then ns:RefreshSelectionBar() end
+    end)
+    row.check = check
+
     local icon = row:CreateTexture(nil, "ARTWORK")
-    icon:SetPoint("LEFT", 4, 0)
+    icon:SetPoint("LEFT", check, "RIGHT", 2, 0)
     icon:SetSize(22, 22)
     row.icon = icon
 
@@ -133,6 +153,7 @@ end
 
 local function FormatRow(row, pin)
     row.pinData = pin
+    row.check:SetChecked(state.selected[pin.id] == true)
 
     local cat = ns:GetCategoryById(pin.category)
     if cat then
@@ -172,7 +193,7 @@ local function EnsurePanel()
 
     local f = CreateFrame("Frame", "LorePinListPanel", UIParent, "BackdropTemplate")
     f:SetSize(540, 556)
-    Layout.CloseOnEscape(f)
+    Layout.CloseOnEscape(f, nil, { "LOREPIN_LIST_CHANGE_CATEGORY", "LOREPIN_LIST_DELETE_SELECTED" })
     f:SetPoint("CENTER")
     f:SetFrameStrata("MEDIUM")
     f:SetToplevel(true)
@@ -331,7 +352,7 @@ local function EnsurePanel()
     -- visually distinct from the rest of the panel.
     local listBg = CreateFrame("Frame", nil, f, "BackdropTemplate")
     listBg:SetPoint("TOPLEFT", MARGIN, -HEADER_H)
-    listBg:SetPoint("BOTTOMRIGHT", -MARGIN, 56)
+    listBg:SetPoint("BOTTOMRIGHT", -MARGIN, 88)
     listBg:SetBackdrop({
         bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
         edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -354,6 +375,111 @@ local function EnsurePanel()
     f.scrollFrame = scroll
     f.scrollChild = scrollChild
     f.rows = {}
+
+    -- Selection row: count, [Select All], [Clear] ... [Change Category], [Delete]
+    local selText = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    selText:SetPoint("BOTTOMLEFT", MARGIN, 64)
+
+    local function SelBtn(text, w)
+        local b = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        b:SetSize(w, 22)
+        b:SetText(text)
+        return b
+    end
+
+    local selectAllBtn = SelBtn(L.LIST_SELECT_ALL, 84)
+    selectAllBtn:SetPoint("BOTTOMLEFT", MARGIN + 64, 58)
+    local clearBtn = SelBtn(L.LIST_SELECT_NONE, 84)
+    clearBtn:SetPoint("LEFT", selectAllBtn, "RIGHT", 4, 0)
+
+    local changeDropdown = CreateFrame("Frame", "LorePinListChangeCategoryDropdown", f, "UIDropDownMenuTemplate")
+    UIDropDownMenu_SetWidth(changeDropdown, 110)
+    UIDropDownMenu_SetText(changeDropdown, L.LIST_CHANGE_CATEGORY)
+
+    local deleteBtn = SelBtn(L.LIST_DELETE_SELECTED, 84)
+    deleteBtn:SetPoint("BOTTOMRIGHT", -MARGIN, 58)
+    -- Both actions sit on the right; selection controls stay on the left.
+    changeDropdown:SetPoint("RIGHT", deleteBtn, "LEFT", Layout.DROPDOWN_RIGHT_OFFSET - 4, -2)
+
+    selectAllBtn:SetScript("OnClick", function()
+        for _, row in ipairs(f.rows) do
+            if row:IsShown() and row.pinData then state.selected[row.pinData.id] = true end
+        end
+        ns:RefreshPinList()
+    end)
+    clearBtn:SetScript("OnClick", function()
+        wipe(state.selected)
+        ns:RefreshPinList()
+    end)
+
+    local function ClearSelectionAndRefresh()
+        wipe(state.selected)
+        ns:RefreshPinList()
+    end
+
+    -- The confirm dialog does not block the list, so search or filters may change while it is open.
+    -- Only pins that are still selected (and so still visible) are acted on.
+    local function StillSelected(ids)
+        local out = {}
+        for _, id in ipairs(ids) do
+            if state.selected[id] then out[#out + 1] = id end
+        end
+        return out
+    end
+
+    StaticPopupDialogs["LOREPIN_LIST_CHANGE_CATEGORY"] = {
+        text = "",
+        button1 = YES, button2 = NO,
+        OnAccept = function(_, data)
+            local changed = ns:SetPinsCategory(StillSelected(data.ids), data.categoryId)
+            if changed then ns:Print(string.format(L.LIST_CHANGED, changed, data.name)) end
+            ClearSelectionAndRefresh()
+        end,
+        timeout = 0, whileDead = true, hideOnEscape = true, preferredIndex = 3,
+    }
+    StaticPopupDialogs["LOREPIN_LIST_DELETE_SELECTED"] = {
+        text = "",
+        button1 = YES, button2 = NO,
+        OnAccept = function(_, data)
+            local removed = ns:DeletePins(StillSelected(data.ids))
+            ns:Print(string.format(L.LIST_DELETED, removed))
+            ClearSelectionAndRefresh()
+        end,
+        timeout = 0, whileDead = true, hideOnEscape = true, preferredIndex = 3,
+    }
+
+    UIDropDownMenu_Initialize(changeDropdown, function(_, level)
+        for _, cat in ipairs(ns:GetCategories()) do
+            local info = UIDropDownMenu_CreateInfo()
+            local color = string.format("|cff%02x%02x%02x", cat.color.r * 255, cat.color.g * 255, cat.color.b * 255)
+            info.text = string.format("|T%s:16:16|t %s%s|r", cat.icon, color, cat.name)
+            info.notCheckable = true
+            info.func = function()
+                CloseDropDownMenus()
+                local ids = SelectedIds()
+                if #ids == 0 then return end
+                StaticPopupDialogs["LOREPIN_LIST_CHANGE_CATEGORY"].text = string.format(L.LIST_CHANGE_CONFIRM, #ids, cat.name)
+                StaticPopup_Show("LOREPIN_LIST_CHANGE_CATEGORY", nil, nil, { ids = ids, categoryId = cat.id, name = cat.name })
+            end
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end)
+
+    deleteBtn:SetScript("OnClick", function()
+        local ids = SelectedIds()
+        if #ids == 0 then return end
+        StaticPopupDialogs["LOREPIN_LIST_DELETE_SELECTED"].text = string.format(L.LIST_DELETE_CONFIRM, #ids)
+        StaticPopup_Show("LOREPIN_LIST_DELETE_SELECTED", nil, nil, { ids = ids })
+    end)
+
+    f.RefreshSelectionBar = function()
+        local count = #SelectedIds()
+        selText:SetText(string.format(L.LIST_SELECTED, count))
+        local any = count > 0
+        clearBtn:SetEnabled(any)
+        deleteBtn:SetEnabled(any)
+        if any then UIDropDownMenu_EnableDropDown(changeDropdown) else UIDropDownMenu_DisableDropDown(changeDropdown) end
+    end
 
     -- Bottom row: total count (left) + New Pin button (right)
     local totalText = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -383,6 +509,8 @@ function ns:RefreshPinList()
     local L = self.L
     if f.RefreshFilterStates then f.RefreshFilterStates() end
     local pins = self:SortPins(self:FilterPins(self:GetAllPins(), state.searchText, state.activeCategories), state.sortMode)
+    self:KeepVisibleSelection(state.selected, pins)
+    f.RefreshSelectionBar()
 
     -- Ensure row pool size
     local rows = f.rows
@@ -446,4 +574,8 @@ end
 
 function ns:ForgetCategoryFilter(id)
     state.activeCategories[id] = nil
+end
+
+function ns:RefreshSelectionBar()
+    if panel then panel.RefreshSelectionBar() end
 end

@@ -160,6 +160,33 @@ function ns:DeletePins(pinIds)
     return removed
 end
 
+-- Returns the number of pins changed, or nil when the category does not exist.
+function ns:SetPinsCategory(pinIds, categoryId)
+    if not self:GetCategoryById(categoryId) then return nil end
+    local changed = 0
+    for _, pinId in ipairs(pinIds) do
+        local pin = self:GetPin(pinId)
+        if pin then
+            pin.category = categoryId
+            pin.updatedAt = time()
+            changed = changed + 1
+        end
+    end
+    if changed > 0 then NotifyChanged() end
+    return changed
+end
+
+-- selected: { [pinId] = true }. Drops pins that are not in the visible list and returns how many remain.
+function ns:KeepVisibleSelection(selected, visiblePins)
+    local visible = {}
+    for _, pin in ipairs(visiblePins) do visible[pin.id] = true end
+    local count = 0
+    for id in pairs(selected) do
+        if visible[id] then count = count + 1 else selected[id] = nil end
+    end
+    return count
+end
+
 function ns:GetPinsForMap(mapID)
     local result = {}
     for _, pin in ipairs(self.db.pins) do
