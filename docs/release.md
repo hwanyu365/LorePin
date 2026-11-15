@@ -7,7 +7,11 @@
 - `main` 최신 CI(`verify`·`review`) 통과
 - `LorePin.toc` 의 `## Version` 이 이번 태그 번호와 같음, `## Interface` 가 현재 Retail 빌드와 같음
 - `CHANGELOG.md` 에 이번 버전 절이 있음 → CurseForge 업로드의 changelog 가 이 절이다
-- `sh .github/spec-trace.sh` 의 `M MANUAL` TC 마다 이번 태그 대상 커밋으로 게임 내 확인한 방법과 결과 → 하나라도 비면 태그를 만들지 않는다
+- `sh .github/spec-trace.sh` 의 `M MANUAL` TC 마다 게임 내 확인한 방법과 결과 → 하나라도 비면 태그를 만들지 않는다
+  - PR 마다 게임 내 확인 결과를 PR 에 남기므로, 그 기록으로 갈음한다. TC 마다 확인한 PR 을 릴리스 노트 초안에 적는다.
+  - 갈음하는 조건: 그 PR 의 확인 커밋부터 태그 대상 커밋까지 런타임 파일(`*.lua`·`*.toc`, 테스트 제외) 변경이 `## Version` 줄뿐 (`git diff --stat <확인 커밋>..<태그 대상> -- '*.lua' '*.toc'`).
+  - 그 밖의 런타임 변경이 있으면 그 변경이 닿는 TC 만 태그 대상 커밋으로 다시 확인한다.
+- 3(이전 버전에서의 업데이트)은 `LorePinDB` 기본값·구조(`Core/Config.lua`)가 직전 릴리스와 다를 때만 게임 내에서 확인한다. 같으면 `git diff <직전 태그>..<태그 대상> -- Core/Config.lua` 결과로 갈음한다.
 
 ## 2. 게임 내 확인 (태그 대상 커밋)
 
