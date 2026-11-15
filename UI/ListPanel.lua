@@ -273,7 +273,7 @@ local function EnsurePanel()
     UIDropDownMenu_Initialize(filterDropdown, function(_, level)
         local all = UIDropDownMenu_CreateInfo()
         all.text = L.LIST_FILTER_ALL
-        all.checked = not HasAnyFilter()
+        all.checked = function() return not HasAnyFilter() end
         all.isNotRadio = true
         all.keepShownOnClick = true
         all.func = function()
