@@ -416,11 +416,21 @@ local function EnsurePanel()
         ns:RefreshPinList()
     end
 
+    -- The confirm dialog does not block the list, so search or filters may change while it is open.
+    -- Only pins that are still selected (and so still visible) are acted on.
+    local function StillSelected(ids)
+        local out = {}
+        for _, id in ipairs(ids) do
+            if state.selected[id] then out[#out + 1] = id end
+        end
+        return out
+    end
+
     StaticPopupDialogs["LOREPIN_LIST_CHANGE_CATEGORY"] = {
         text = "",
         button1 = YES, button2 = NO,
         OnAccept = function(_, data)
-            local changed = ns:SetPinsCategory(data.ids, data.categoryId)
+            local changed = ns:SetPinsCategory(StillSelected(data.ids), data.categoryId)
             if changed then ns:Print(string.format(L.LIST_CHANGED, changed, data.name)) end
             ClearSelectionAndRefresh()
         end,
@@ -430,7 +440,7 @@ local function EnsurePanel()
         text = "",
         button1 = YES, button2 = NO,
         OnAccept = function(_, data)
-            local removed = ns:DeletePins(data.ids)
+            local removed = ns:DeletePins(StillSelected(data.ids))
             ns:Print(string.format(L.LIST_DELETED, removed))
             ClearSelectionAndRefresh()
         end,
