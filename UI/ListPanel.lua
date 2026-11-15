@@ -376,7 +376,7 @@ local function EnsurePanel()
     f.scrollChild = scrollChild
     f.rows = {}
 
-    -- Selection row: count, [Select All], [Clear], [Change Category], [Delete]
+    -- Selection row: count, [Select All], [Clear] ... [Change Category], [Delete]
     local selText = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     selText:SetPoint("BOTTOMLEFT", MARGIN, 64)
 
@@ -393,12 +393,13 @@ local function EnsurePanel()
     clearBtn:SetPoint("LEFT", selectAllBtn, "RIGHT", 4, 0)
 
     local changeDropdown = CreateFrame("Frame", "LorePinListChangeCategoryDropdown", f, "UIDropDownMenuTemplate")
-    changeDropdown:SetPoint("LEFT", clearBtn, "RIGHT", -12, -2)
     UIDropDownMenu_SetWidth(changeDropdown, 110)
     UIDropDownMenu_SetText(changeDropdown, L.LIST_CHANGE_CATEGORY)
 
     local deleteBtn = SelBtn(L.LIST_DELETE_SELECTED, 84)
     deleteBtn:SetPoint("BOTTOMRIGHT", -MARGIN, 58)
+    -- Both actions sit on the right; selection controls stay on the left.
+    changeDropdown:SetPoint("RIGHT", deleteBtn, "LEFT", Layout.DROPDOWN_RIGHT_OFFSET - 4, -2)
 
     selectAllBtn:SetScript("OnClick", function()
         for _, row in ipairs(f.rows) do
