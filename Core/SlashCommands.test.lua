@@ -18,7 +18,9 @@ local function slash_addon(opts)
     if opts.list ~= false then
         function ns:ShowPinList() self.opened[#self.opened + 1] = { "list" } end
     end
-    function ns:ShowPinDetail(id) self.opened[#self.opened + 1] = { "detail", id } end
+    if opts.detail ~= false then
+        function ns:ShowPinDetail(id) self.opened[#self.opened + 1] = { "detail", id } end
+    end
     load_source("Core/SlashCommands.lua", ns)
     return ns, SlashCmdList["LOREPIN"]
 end
@@ -82,13 +84,14 @@ describe("슬래시 명령", function()
         eq(ns.opened, {})
     end)
 
-    it("TC#14 목록·설정 패널이 아직 없으면 채팅창 안내로 대신한다", function()
-        local ns, run = slash_addon({ list = false, settings = false })
-        ns:CreatePin({ title = "A", mapID = 1, x = 0, y = 0 })
+    it("TC#14 목록·설정·상세 패널이 아직 없으면 채팅창 안내로 대신한다", function()
+        local ns, run = slash_addon({ list = false, settings = false, detail = false })
+        local a = ns:CreatePin({ title = "A", mapID = 1, x = 0, y = 0 })
         ns.printed = {}
         run("list")
         run("settings")
-        eq(ns.printed, { string.format(ns.L.LIST_TOTAL_COUNT, 1), "Settings panel not ready." })
+        run("detail " .. a.id)
+        eq(ns.printed, { string.format(ns.L.LIST_TOTAL_COUNT, 1), "Settings panel not ready.", ns.L.PIN_NOT_FOUND })
         eq(ns.opened, {})
     end)
 end)
