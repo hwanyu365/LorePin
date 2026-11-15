@@ -35,43 +35,6 @@ local function ClearCategoryFilter()
     wipe(state.activeCategories)
 end
 
--- ─── Sorting / filtering ─────────────────────────────────────────────────────
-
-local function FilterPins(pins)
-    local result = {}
-    local q = state.searchText ~= "" and state.searchText:lower() or nil
-
-    for _, pin in ipairs(pins) do
-        local ok = true
-        if HasAnyFilter() and not IsCategoryActive(pin.category) then
-            ok = false
-        end
-        if ok and q then
-            local title = (pin.title or ""):lower()
-            local note  = (pin.note  or ""):lower()
-            if not (title:find(q, 1, true) or note:find(q, 1, true)) then
-                ok = false
-            end
-        end
-        if ok then result[#result + 1] = pin end
-    end
-    return result
-end
-
-local function SortPins(pins)
-    if state.sortMode == "newest" then
-        table.sort(pins, function(a, b) return (a.createdAt or 0) > (b.createdAt or 0) end)
-    elseif state.sortMode == "oldest" then
-        table.sort(pins, function(a, b) return (a.createdAt or 0) < (b.createdAt or 0) end)
-    elseif state.sortMode == "map" then
-        table.sort(pins, function(a, b)
-            if (a.mapID or 0) ~= (b.mapID or 0) then return (a.mapID or 0) < (b.mapID or 0) end
-            return (a.createdAt or 0) > (b.createdAt or 0)
-        end)
-    end
-    return pins
-end
-
 -- ─── Row factory ─────────────────────────────────────────────────────────────
 
 local function CreateRow(parent)
@@ -420,8 +383,7 @@ function ns:RefreshPinList()
 
     local L = self.L
     if f.RefreshFilterStates then f.RefreshFilterStates() end
-    local pins = FilterPins(self:GetAllPins())
-    SortPins(pins)
+    local pins = self:SortPins(self:FilterPins(self:GetAllPins(), state.searchText, state.activeCategories), state.sortMode)
 
     -- Ensure row pool size
     local rows = f.rows

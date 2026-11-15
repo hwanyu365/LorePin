@@ -270,3 +270,46 @@ describe("길안내", function()
         eq(ns._tomtomUids[pin.id], nil)
     end)
 end)
+
+describe("목록 필터·정렬", function()
+    local function pins_for_list(ns)
+        support.now = 100
+        local a = ns:CreatePin(pin_fields({ title = "Dark Cave", category = "danger", mapID = 2 }))
+        support.now = 300
+        local b = ns:CreatePin(pin_fields({ title = "Lake", note = "50% fish", category = "gather", mapID = 1 }))
+        support.now = 200
+        local c = ns:CreatePin(pin_fields({ title = "cavern", category = "general", mapID = 2 }))
+        return a, b, c
+    end
+
+    it("TC#23 검색 단독·필터 단독(여러 개)·둘 다·필터 없음", function()
+        local ns = support.addon()
+        local a, b, c = pins_for_list(ns)
+        local all = ns:GetAllPins()
+        eq(ns:FilterPins(all, "", {}), { a, b, c })
+        eq(ns:FilterPins(all, nil, nil), { a, b, c })
+        eq(ns:FilterPins(all, "CAV", {}), { a, c })
+        eq(ns:FilterPins(all, "% fish", {}), { b })
+        eq(ns:FilterPins(all, "", { danger = true }), { a })
+        eq(ns:FilterPins(all, "", { danger = true, gather = true }), { a, b })
+        eq(ns:FilterPins(all, "cav", { general = true, gather = true }), { c })
+        eq(ns:FilterPins(all, "lake", { danger = true }), {})
+        eq(ns:FilterPins({ a, b }, "", {}), { a, b })
+        eq(ns:GetAllPins(), { a, b, c })
+    end)
+
+    it("TC#24 세 정렬 순서, 지도순의 같은 지도 안 최신순", function()
+        local ns = support.addon()
+        local a, b, c = pins_for_list(ns)
+        local function sorted(mode)
+            local list = { a, b, c }
+            ns:SortPins(list, mode)
+            return list
+        end
+        eq(sorted("newest"), { b, c, a })
+        eq(sorted("oldest"), { a, c, b })
+        eq(sorted("map"), { b, c, a })
+        local list = { a, b, c }
+        eq(ns:SortPins(list, "newest"), { b, c, a })
+    end)
+end)

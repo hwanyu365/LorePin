@@ -165,16 +165,39 @@ end
 -- Search pins by title/note substring (case-insensitive)
 function ns:SearchPins(query)
     if not query or query == "" then return self:GetAllPins() end
-    local q = query:lower()
+    return self:FilterPins(self.db.pins, query)
+end
+
+-- categories: { [catId] = true }. Empty or nil = every category.
+function ns:FilterPins(pins, query, categories)
+    local q = query and query ~= "" and query:lower() or nil
+    local anyCategory = categories ~= nil and next(categories) ~= nil
     local result = {}
-    for _, pin in ipairs(self.db.pins) do
-        local title = (pin.title or ""):lower()
-        local note  = (pin.note  or ""):lower()
-        if title:find(q, 1, true) or note:find(q, 1, true) then
-            result[#result + 1] = pin
+    for _, pin in ipairs(pins) do
+        local ok = not anyCategory or categories[pin.category] == true
+        if ok and q then
+            local title = (pin.title or ""):lower()
+            local note  = (pin.note  or ""):lower()
+            ok = (title:find(q, 1, true) or note:find(q, 1, true)) ~= nil
         end
+        if ok then result[#result + 1] = pin end
     end
     return result
+end
+
+-- mode: newest | oldest | map. Sorts in place.
+function ns:SortPins(pins, mode)
+    if mode == "newest" then
+        table.sort(pins, function(a, b) return (a.createdAt or 0) > (b.createdAt or 0) end)
+    elseif mode == "oldest" then
+        table.sort(pins, function(a, b) return (a.createdAt or 0) < (b.createdAt or 0) end)
+    elseif mode == "map" then
+        table.sort(pins, function(a, b)
+            if (a.mapID or 0) ~= (b.mapID or 0) then return (a.mapID or 0) < (b.mapID or 0) end
+            return (a.createdAt or 0) > (b.createdAt or 0)
+        end)
+    end
+    return pins
 end
 
 -- ─── Waypoint / TomTom helpers ────────────────────────────────────────────────
