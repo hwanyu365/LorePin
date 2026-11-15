@@ -270,36 +270,56 @@ local function EnsurePanel()
         UIDropDownMenu_SetText(filterDropdown, ns:DescribeCategoryFilter(state.activeCategories))
     end
 
-    UIDropDownMenu_Initialize(filterDropdown, function(_, level)
-        local all = UIDropDownMenu_CreateInfo()
-        all.text = L.LIST_FILTER_ALL
-        all.checked = function() return not HasAnyFilter() end
-        all.isNotRadio = true
-        all.keepShownOnClick = true
-        all.func = function()
-            ClearCategoryFilter()
+    -- Row layout is [icon] [name] ... [check]. UIDropDownMenu only draws its check on the left,
+    -- so rows are not checkable and the right-side icon slot draws the check box instead.
+    local CHECK_TEXTURE = [[Interface\Common\UI-DropDownRadioChecks]]
+    local ALL_VALUE = "__all"
+
+    local function IsRowChecked(value)
+        if value == ALL_VALUE then return not HasAnyFilter() end
+        return IsCategoryActive(value)
+    end
+
+    local function ApplyCheck(icon, checked)
+        if checked then icon:SetTexCoord(0, 0.5, 0, 0.5) else icon:SetTexCoord(0.5, 1, 0, 0.5) end
+    end
+
+    -- Every row changes when [All] is pressed, so all visible rows are redrawn after any click.
+    local function RefreshOpenChecks()
+        local list = _G["DropDownList1"]
+        if not list or list.dropdown ~= filterDropdown then return end
+        for i = 1, list.numButtons or 0 do
+            local row = _G["DropDownList1Button" .. i]
+            local icon = row and (row.Icon or _G[row:GetName() .. "Icon"])
+            if icon and row.value ~= nil then ApplyCheck(icon, IsRowChecked(row.value)) end
+        end
+    end
+
+    local function AddRow(level, text, value, onClick)
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = text
+        info.value = value
+        info.notCheckable = true
+        info.keepShownOnClick = true
+        info.icon = CHECK_TEXTURE
+        local checked = IsRowChecked(value)
+        info.tCoordLeft, info.tCoordRight = checked and 0 or 0.5, checked and 0.5 or 1
+        info.tCoordTop, info.tCoordBottom = 0, 0.5
+        info.func = function(btn)
+            onClick(btn.value)
             RefreshFilterText()
             ns:RefreshPinList()
-            UIDropDownMenu_Refresh(filterDropdown)
+            RefreshOpenChecks()
         end
-        UIDropDownMenu_AddButton(all, level)
+        UIDropDownMenu_AddButton(info, level)
+    end
 
+    UIDropDownMenu_Initialize(filterDropdown, function(_, level)
+        AddRow(level, L.LIST_FILTER_ALL, ALL_VALUE, function() ClearCategoryFilter() end)
         for _, cat in ipairs(ns:GetCategories()) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = cat.name
-            info.icon = cat.icon
-            info.value = cat.id
-            info.colorCode = string.format("|cff%02x%02x%02x", cat.color.r * 255, cat.color.g * 255, cat.color.b * 255)
-            info.checked = function() return IsCategoryActive(cat.id) end
-            info.isNotRadio = true
-            info.keepShownOnClick = true
-            info.func = function(btn)
-                ToggleCategory(btn.value)
-                RefreshFilterText()
-                ns:RefreshPinList()
-                UIDropDownMenu_Refresh(filterDropdown)
-            end
-            UIDropDownMenu_AddButton(info, level)
+            local color = string.format("|cff%02x%02x%02x", cat.color.r * 255, cat.color.g * 255, cat.color.b * 255)
+            local text = string.format("|T%s:16:16|t %s%s|r", cat.icon, color, cat.name)
+            AddRow(level, text, cat.id, ToggleCategory)
         end
     end)
 
