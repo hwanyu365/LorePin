@@ -30,6 +30,9 @@ function support.stub_wow(opts)
     CreateFrame = nil
     SlashCmdList = nil
     Settings = nil
+    InCombatLockdown = function() return false end
+    StaticPopup_Visible = function() return nil end
+    StaticPopup_Hide = function() end
     LorePinDB = opts.db
 end
 
