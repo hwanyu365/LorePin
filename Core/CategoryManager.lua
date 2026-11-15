@@ -164,6 +164,8 @@ function ns:DeleteCustomCategory(id)
         if pin.category == id then doomed[#doomed + 1] = pin.id end
     end
     self:RemoveCustomCategory(id)
+    -- The list panel may be hidden, and a later category can reuse this ID before it shows again.
+    if self.ForgetCategoryFilter then self:ForgetCategoryFilter(id) end
     self:DeletePins(doomed)
     if #doomed == 0 then
         if self.RefreshWorldMapPins then self:RefreshWorldMapPins() end

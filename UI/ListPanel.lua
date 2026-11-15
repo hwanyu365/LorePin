@@ -448,3 +448,7 @@ function ns:RefreshCategoryFilters()
     panel.RebuildCategoryFilters()
     self:RefreshPinList()
 end
+
+function ns:ForgetCategoryFilter(id)
+    state.activeCategories[id] = nil
+end

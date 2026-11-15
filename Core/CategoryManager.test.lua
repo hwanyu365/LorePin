@@ -95,6 +95,8 @@ describe("사용자 카테고리 만들기·지우기", function()
         local h1, h2 = pin("h1", herbs.id), pin("h2", herbs.id)
         local o1, g1 = pin("o1", ore.id), pin("g1", "gather")
         ns.calls.removedFromMap = {}
+        local forgotten = {}
+        function ns:ForgetCategoryFilter(id) forgotten[#forgotten + 1] = id end
         local mapBefore, listBefore = ns.calls.worldMap, ns.calls.list
 
         eq(ns:DeleteCustomCategory(herbs.id), 2)
@@ -107,6 +109,7 @@ describe("사용자 카테고리 만들기·지우기", function()
         eq(ns:DeleteCustomCategory(ore.id), 1)
         eq(ns:DeleteCustomCategory(ore.id), nil)
         eq(ns:DeleteCustomCategory("gather"), nil)
+        eq(forgotten, { herbs.id, ore.id })
         eq(ns:GetAllPins(), { g1 })
 
         eq(pin("x", "custom9").category, "general")
