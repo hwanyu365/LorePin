@@ -6,6 +6,7 @@ local L = ns.L
 local function NotifyChanged()
     if ns.RefreshWorldMapPins then ns:RefreshWorldMapPins() end
     if ns.RefreshPinList      then ns:RefreshPinList()      end
+    if ns.ClosePinDetailIfDeleted then ns:ClosePinDetailIfDeleted() end
 end
 
 -- Pin record shape:
@@ -75,7 +76,7 @@ function ns:CreatePin(fields)
         id        = self.db.nextPinId or 1,
         title     = fields.title,
         note      = fields.note or "",
-        category  = fields.category or self:GetDefaultCategoryId(),
+        category  = self:KnownCategoryOrDefault(fields.category),
         mapID     = fields.mapID,
         x         = fields.x,
         y         = fields.y,
@@ -121,7 +122,7 @@ function ns:UpdatePin(pinId, fields)
 
     if fields.title    ~= nil then pin.title    = fields.title end
     if fields.note     ~= nil then pin.note     = fields.note end
-    if fields.category ~= nil then pin.category = fields.category end
+    if fields.category ~= nil then pin.category = self:KnownCategoryOrDefault(fields.category) end
     if fields.mapID    ~= nil then pin.mapID    = fields.mapID end
     if fields.x        ~= nil then pin.x        = fields.x end
     if fields.y        ~= nil then pin.y        = fields.y end

@@ -65,6 +65,11 @@ function ns:GetDefaultCategoryId()
     return "general"
 end
 
+function ns:KnownCategoryOrDefault(id)
+    if id ~= nil and self:GetCategoryById(id) then return id end
+    return self:GetDefaultCategoryId()
+end
+
 -- Custom category CRUD
 function ns:AddCustomCategory(id, name, icon, color)
     if self:GetCategoryById(id) then
@@ -95,4 +100,79 @@ function ns:IsCustomCategory(id)
         if cat.id == id then return true end
     end
     return false
+end
+
+local MAX_NAME_CHARS = 24
+
+ns.CUSTOM_CATEGORY_ICONS = {
+    [[Interface\Icons\INV_Misc_Bag_10]],
+    [[Interface\Icons\INV_Misc_Gem_01]],
+    [[Interface\Icons\INV_Misc_Key_03]],
+    [[Interface\Icons\INV_Misc_Coin_01]],
+    [[Interface\Icons\INV_Misc_Book_09]],
+    [[Interface\Icons\INV_Misc_Herb_01]],
+    [[Interface\Icons\INV_Ore_Copper_01]],
+    [[Interface\Icons\INV_Misc_Fish_02]],
+    [[Interface\Icons\INV_Misc_Head_Dragon_01]],
+    [[Interface\Icons\INV_Misc_Flower_02]],
+    [[Interface\Icons\Ability_Hunter_SniperShot]],
+    [[Interface\Icons\INV_Misc_Bone_HumanSkull_01]],
+}
+
+local function Trim(s)
+    return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+-- Counts UTF-8 characters, not bytes, so Korean names get the same limit as Latin ones.
+local function CharCount(s)
+    return select(2, s:gsub("[^\128-\191]", ""))
+end
+
+function ns:CheckCategoryName(name)
+    if not name or not name:find("%S") then return false, L.CATEGORY_NAME_REQUIRED end
+    local trimmed = Trim(name)
+    if CharCount(trimmed) > MAX_NAME_CHARS then return false, L.CATEGORY_NAME_TOO_LONG end
+    local lowered = trimmed:lower()
+    for _, cat in ipairs(self:GetCategories()) do
+        if (cat.name or ""):lower() == lowered then return false, L.CATEGORY_NAME_DUPLICATE end
+    end
+    return true
+end
+
+function ns:CreateCustomCategory(name, icon, color)
+    local ok, reason = self:CheckCategoryName(name)
+    if not ok then return nil, reason end
+
+    local n = 1
+    while self:GetCategoryById("custom" .. n) do n = n + 1 end
+
+    local validIcon = self.CUSTOM_CATEGORY_ICONS[1]
+    for _, candidate in ipairs(self.CUSTOM_CATEGORY_ICONS) do
+        if candidate == icon then validIcon = icon end
+    end
+
+    local id = "custom" .. n
+    self:AddCustomCategory(id, Trim(name), validIcon, color)
+    return self:GetCategoryById(id)
+end
+
+-- Returns the number of pins deleted with the category, or nil when it is not a custom category.
+function ns:DeleteCustomCategory(id)
+    if not self:IsCustomCategory(id) then return nil end
+    local doomed = {}
+    for _, pin in ipairs(self:GetAllPins()) do
+        if pin.category == id then doomed[#doomed + 1] = pin.id end
+    end
+    for _, pinId in ipairs(doomed) do self:DeletePin(pinId) end
+    self:RemoveCustomCategory(id)
+    if self.RefreshWorldMapPins then self:RefreshWorldMapPins() end
+    if self.RefreshPinList      then self:RefreshPinList()      end
+    return #doomed
+end
+
+function ns:DropUnknownCategories(set)
+    for id in pairs(set) do
+        if not self:GetCategoryById(id) then set[id] = nil end
+    end
+    return set
 end

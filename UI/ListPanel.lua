@@ -381,6 +381,7 @@ end
 function ns:RefreshPinList()
     local f = EnsurePanel()
     if not f:IsShown() then return end
+    self:DropUnknownCategories(state.activeCategories)
 
     local L = self.L
     if f.RefreshFilterStates then f.RefreshFilterStates() end
@@ -438,5 +439,12 @@ function ns:ShowPinList()
     -- correct layout-resolved width for even button distribution.
     f:Show()
     f.RebuildCategoryFilters()
+    self:RefreshPinList()
+end
+
+function ns:RefreshCategoryFilters()
+    if not panel or not panel:IsShown() then return end
+    self:DropUnknownCategories(state.activeCategories)
+    panel.RebuildCategoryFilters()
     self:RefreshPinList()
 end

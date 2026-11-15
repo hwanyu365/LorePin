@@ -376,3 +376,9 @@ function ns:ShowPinDetail(pinId)
     f:Show()
 end
 
+function ns:ClosePinDetailIfDeleted()
+    if not panel or not panel:IsShown() then return end
+    if self:GetPin(panel.currentPinId) then return end
+    panel.isDirty = false
+    panel:Hide()
+end
