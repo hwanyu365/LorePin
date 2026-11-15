@@ -84,10 +84,13 @@ function Layout.CloseOnEscape(f, onEscape, dialogs)
         end
         if onEscape then onEscape(self) else self:Hide() end
     end)
-    -- A window kept open by a confirm dialog must not keep swallowing keys if combat starts.
-    f:SetScript("OnKeyUp", function(self)
+    -- A window left swallowing keys would block movement if combat starts before the next key resets it.
+    -- A window hidden by ESC never gets the key-up, so hiding resets it too.
+    local function restore(self)
         if not InCombatLockdown() then self:SetPropagateKeyboardInput(true) end
-    end)
+    end
+    f:SetScript("OnKeyUp", restore)
+    f:HookScript("OnHide", restore)
 end
 
 -- Create a movable, toplevel dialog with a title and a close button.

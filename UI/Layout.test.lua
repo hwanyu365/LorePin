@@ -1,11 +1,15 @@
 local support = load_source("scripts/test-support.lua")
 
 local function fake_frame()
-    local f = { scripts = {}, propagateCalls = {}, hidden = 0 }
+    local f = { scripts = {}, hooks = {}, propagateCalls = {}, hidden = 0 }
     function f:EnableKeyboard(on) self.keyboard = on end
     function f:SetScript(event, fn) self.scripts[event] = fn end
+    function f:HookScript(event, fn) self.hooks[event] = fn end
     function f:SetPropagateKeyboardInput(on) self.propagateCalls[#self.propagateCalls + 1] = on end
-    function f:Hide() self.hidden = self.hidden + 1 end
+    function f:Hide()
+        self.hidden = self.hidden + 1
+        if self.hooks.OnHide then self.hooks.OnHide(self) end
+    end
     return f
 end
 
@@ -36,12 +40,13 @@ describe("ESC 닫기", function()
         eq(f.hidden, 0)
     end)
 
-    it("TC#37 닫기 동작이 없으면 창을 숨긴다", function()
+    it("TC#37 닫기 동작이 없으면 창을 숨기고, 숨겨지면 키 전달을 넘김으로 돌린다", function()
         local Layout = layout()
         local f = fake_frame()
         Layout.CloseOnEscape(f)
         f.scripts.OnKeyDown(f, "ESCAPE")
         eq(f.hidden, 1)
+        eq(f.propagateCalls, { false, true })
     end)
 
     it("TC#37 그 창의 확인 대화상자가 떠 있으면 ESC 는 확인 대화상자만 닫는다", function()
@@ -72,6 +77,7 @@ describe("ESC 닫기", function()
         f.scripts.OnKeyDown(f, "ESCAPE")
         f.scripts.OnKeyDown(f, "W")
         f.scripts.OnKeyUp(f, "ESCAPE")
+        f.hooks.OnHide(f)
         eq(f.propagateCalls, {})
         eq(closed, 1)
     end)
