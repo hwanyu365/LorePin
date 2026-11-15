@@ -14,14 +14,17 @@
     | 바뀌어도 되는 것 | 이유 |
     | --- | --- |
     | `LorePin.toc` 의 `## Version` 줄 | 버전 표시만 바뀐다 |
-    | `docs/`, `*.md` | 문서 |
-    | `*.test.lua`, `scripts/` | 테스트·검증 도구, 배포 파일에 실리지 않는다 |
-    | `.github/`, `.claude/`, `.githooks/`, `.luacheckrc`, `.editorconfig`, `.gitattributes`, `.gitignore` | CI·개발 설정 |
+    | `docs/`, `*.md` | 문서, 배포 zip 에 실리지 않는다 |
+    | `*.test.lua`, `scripts/` | 테스트·검증 도구, 배포 zip 에 실리지 않는다 |
+    | `.github/`, `.claude/`, `.githooks/`, `.luacheckrc`, `.editorconfig`, `.gitignore` | CI·개발 설정, 배포 zip 에 실리지 않는다 |
+
+    - 배포 zip 에서 빠지는 범위의 근거: `/curseforge:deploy` 의 패키징 규칙(curseforge 플러그인 `is_packaged`)이 `.` 으로 시작하는 경로, 최상위 `docs/`·`scripts/`, `*.md`, `*.test.lua` 를 뺀다. 그 규칙이 바뀌면 이 표도 맞춘다.
+    - `.gitattributes` 는 zip 에 실리지 않지만 실리는 파일의 바이트(줄바꿈 등)를 바꿀 수 있다 → 허용 목록에 넣지 않는다.
 
   - 판정 명령: 아래 출력이 `LorePin.toc` 의 `## Version` 줄 변경뿐이면 갈음한다 (줄 단위라 `.toc` 의 다른 줄 변경도 보인다).
 
     ```sh
-    git diff -U0 <확인 커밋>..<태그 대상> -- . ':!docs' ':!*.md' ':!*.test.lua' ':!scripts' ':!.github' ':!.claude' ':!.githooks' ':!.luacheckrc' ':!.editorconfig' ':!.gitattributes' ':!.gitignore'
+    git diff -U0 <확인 커밋>..<태그 대상> -- . ':!docs' ':!*.md' ':!*.test.lua' ':!scripts' ':!.github' ':!.claude' ':!.githooks' ':!.luacheckrc' ':!.editorconfig' ':!.gitignore'
     ```
 
 - §3(이전 버전에서의 업데이트)은 저장 데이터를 바꾸는 릴리스에서만 게임 내에서 확인한다.
