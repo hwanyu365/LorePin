@@ -69,7 +69,7 @@ function Layout.ApplyDialogBackdrop(f)
 end
 
 -- WoW delivers a key to the topmost keyboard-enabled frame first, so ESC closes only the window on top.
--- Key propagation is not touched in combat because the call can be blocked there; ESC then also reaches the game menu.
+-- SetPropagateKeyboardInput cannot be called in combat (10.1.5+), so combat leaves the last out-of-combat setting.
 function Layout.CloseOnEscape(f, onEscape, dialogs)
     f:EnableKeyboard(true)
     f:SetScript("OnKeyDown", function(self, key)
