@@ -2,8 +2,6 @@
 
 Pin personal notes to locations on the World of Warcraft world map.
 
-월드맵 위치에 개인 메모를 핀으로 고정합니다.
-
 ## Features
 
 - **Personal Pins**: Drop pins at any location with your own title and note
